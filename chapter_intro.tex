@@ -1,0 +1,26 @@
+\chapter{Introduction}
+\label{chap:Intro}
+\textit{A Very short introduction to our work}
+\vfill
+\minitoc
+\newpage
+
+Combinatorial Optimization has strong applications in several fields, including machine learning, artificial intelligence, and software engineering. In some cases, the main goal is only to find a solution, like for {\it Constraint Satisfaction Problems (CSP)}. A solution will be an assignment of variables satisfying the constraints set. In other words: finding one feasible solution.
+
+\section{CSP applications}
+{\it CSP}s find a lot of applications in the industry, implying the development of many methods to solve them. Meta--heuristics techniques have shown themselves to be effective for solving {\it CSP}s, but in most industrial cases the search space is huge enough to be intractable. However, recent advances in computer architecture are leading us toward massively {\it mul\-ti/many--core} computers, opening a new way to find solutions for these problems in a more feasible manner, reducing search time. Adaptive Search \cite{Diaz} is an efficient methods showing very good performances scaling to hundreds or even thousands of cores, using a multi-walk local search method. %, that is the reason why we have oriented \af{} towards this parallel scheme.
+%(i.e. algorithms that explore the search space by using independent search processes). 
+%For this algorithm, an implementation of a cooperative multi-walks strategy has been published in \cite{Munera1}. These works have shown the efficiency of multi-walk strategy, that is why we have oriented \af{} towards this parallel scheme.
+
+\section{Parallel constraint programming}
+In the last years, a lot of efforts have been made in parallel constraint programming. In this field, the inter-process communication for solver cooperation is one of the most critical issues. 
+To this end, \af{} provides a mechanism of creating solver--independent communication strategies, making easy the study of solving processes and results. Creating solvers implementing different solution strategies can be complex and tedious. In that sense \af{} gives the possibility of prototyping communicating solvers with few efforts.
+
+In Constraint Programming, much research focuses on fitting and improving existing algorithms for specific problems. However, it requires a deep study to find the right algorithm for the right problem. Some related works have been designed to provide generic templates for a variety of local search and evolutionary computation algorithms, allowing rapid prototyping with the possibility of reusing source code. \af{} aims to offer the same advantages, but provides also a mechanism to define communication protocols between solvers.
+
+\section{POSL}
+In this thesis we present \af{}, a framework for easily building many and different cooperating solvers based on coupling four fundamental and independent components: \module s, \opch s, the \cstr{} and {\it communication channels} or \sus s. Recently, the hybridization approach leads to very good results in constraint satisfaction. For that reason, since the solver's component can be combined, our framework is designed to execute in parallel sets of different solvers, with and without communication.
+
+\af{} provides, through a simple operator-based language, a way to create a \cstr, combining already defined {\it components} (\module s and \opch s). A similar idea was proposed in \cite{Fukunaga2008} without communication, introducing an evolutionary approach that uses a simple composition operator to automatically discover new local search heuristics for SAT and to  visualize them as combinations of a set of building blocks. 
+In the last phase of the coding process with \af{}, solvers can be connected each others, depending on the structure of their \opch s, and this way, they can share not only information, but also their behavior, by sharing their \module s. This approach makes the solvers able to evolve during the execution.
+

@@ -1,0 +1,342 @@
+\chapter{State of the art}
+\label{chap:Art}
+\textit{This chapter presents an overview to the state of the art of \COPs{} and different approaches to tackle them. We introduce in Section~\ref{sec:combi} the definition of a \COP{} and the its link with \CSPs{} (\csp), where we concentrate our main efforts, and we give some examples. The basic techniques used to solve these problems are introduced, like {\it Constraint Propagation} (\ref{sec:progagation}), {\it meta-- and hyper--heuristic methods} (Sections~\ref{sec:meta} and \ref{sec:hyper}). We also present some advanced techniques like {\it hybridization} in Section~\ref{sec:hybrid}, {\it parallel computing} in Section~\ref{sec:parallel}, and {\it Solvers cooperation} in Section~\ref{sec:cooperation}. Finally we present {\i parameter setting techniques} in Section~\ref{sec:tunning}.}
+\vfill
+\minitoc
+\newpage
+
+This chapter presents an overview to the state of the art of \COPs{} and different approaches to tackle them. In Section~\ref{sec:combi} the definition of a \CSP{} (\csp), emphasizing in the concept of \CSPs, where we concentrate our main efforts. Constraint propagation techniques are deterministic methods to attack these kind of problems (presented in Section~\ref{sec:progagation}), but in some cases they are incapable to solve them (they are mostly used to reduce the problem's search space or to prove it unsatisfiable). For that reason, the model presented in this thesis is based on \textit{meta-heuristic} methods (Section~\ref{sec:meta}). The \textit{Hybridization} approach combines different techniques in the same solution strategy, so the progresses in this field are exposed in Section~\ref{sec:hybrid}.
+
+The evolution of computer architecture is leading us toward massively multi-core computers for tomorrow, composed of thousands of computing units. A parallel model to solve \csps{} is the core of this work, and its advances, as well as those obtained in the field of \textit{cooperation between solvers}, are presented in Sections~\ref{sec:parallel} and \ref{sec:cooperation} respectively. Finally, this chapter presents in Section~\ref{sec:tunning} an overview of the progresses in the field of \textit{parameter settings}.  
+
+\section{Combinatorial Optimization}
+\label{sec:combi}
+
+An \textit{Optimization Problem} consists in finding the best solution among all possible ones, subject or not, to a set of constraints, depending on it is a restricted or an unrestricted problem. The suitable values for the involved variables belong to a set called {\it domain}. When this domain contains only discrete values, we are facing a \COP, and its goal is to find the best possible solution satisfying a global criterion, named {\it objective function}. {\it Resource Allocations} \cite{Akplogan2011}, \textit{Task Scheduling} \cite{Sibbesen2008}, \textit{Master-keying} \cite{Espelage2000}, \textit{Traveling Salesman}, \textit{Knapsack Problem}, among others, are well-known examples of \COPs{} \cite{Smith2005}.
+
+Sometimes, the main goal is not to find the best solution, but finding one feasible solution. This is the case of \CSPs. Formally, we present the definition of a \csp{} (sometimes also called \textit{Constraint Network}). 
+
+\begin{definition}{\bf (Constraint Satisfaction Problem)}
+\label{def:csp}
+A \CSP{} (\csp, denoted by $\mathcal{P}$) is a triple $\langle X,D,C \rangle$, where:
+\begin{itemize}
+\item $X = \left\{X_1,\ldots,X_n\right\}$ is finite a set of variables,
+\item $D = \left\{D_1,\ldots, D_n\right\}$ is the set of associated domains. Each domain $D_i$ specifies the set of possible values to the variable $X_i$. %is the set of associated domains to each variable in $X$,
+\item $C = \left\{c_1,\ldots, c_m\right\}$ is a set of constraints. Each constraint is defined involving a set of variables, and specifies the possible combinations of values for these variables.
+\end{itemize}
+\end{definition}
+
+%is defined by a triple $\langle X,D,C \rangle$ where:
+%\begin{itemize}
+%	\item $X = \{x_1, x_2, \dots, x_n\}$ is a finite set of variables,
+%	\item $D = \{D_1, D_2,\dots, D_n\}$ 
+%	\item and $C = \{c_1, c_2,\dots,c_m\}$ is a set of constraints.
+%\end{itemize}
+
+In \csps, a \textit{configuration} $s\in D_1\times D_2\times\dots\times D_n$ is a combination of values for the variables in $X$. Following we define the concept of solution, which is in other words, a configuration satisfying all the constraints $c_i \in C$.
+
+\begin{definition}{\bf (Solution of a CSP)}
+\label{solCSP}
+Given a \csp{} $\mathcal{P}=\langle X,D,C \rangle$ and a configuration $S \in D_1\times D_2\times\dots\times D_n$ we say that it is a solution if and only if:	
+\begin{equation*}
+c_i\left(S\right)\text{ is true }\forall c_i \in C
+\end{equation*}
+The set of all solutions of $\mathcal{P}$ is denoted by $\mathnormal{Sol}(\mathcal{P})$
+\end{definition}
+
+This field, also called \CP{} is a famous research topic developed by the field of artificial intelligence in the middle of the 70's, and a programming paradigm since the end of the 80's. A \csp{} can be considered as a special case of \COPs, where the objective function is to reduce to the minimum the number of violated constraints in the model. A solution is then obtained when the number of violated constraints reach the value zero. We focus our work in solving this particular case of problems.
+
+\csps{} find a lot of "real-world" applications in the industry. In practice, these problems are intractable for classical constraint programming approaches, like \textit{tree search-based solvers} or {\it backtracking-based solvers} \cite{Abio2014}, exploring the whole solution space, wish is huge. For that reason, these kinds of problems are mostly tackled by {\it meta-heuristic methods} or hybrid approaches, like \textit{Monte Carlo Tree Search} methods, which combine precision (tree search) with randomness (meta-heuristic) showing good results in artificial intelligence for games \cite{Chaslot2008, Browne2012}.
+
+\section{Constraint propagation}\label{sec:progagation}
+
+% propagation => tree search 
+Constraint propagation techniques are methods used to modify a \CSP{} in order to reduce its variables domains, and turning the problem into one that is equivalent, but usually easier to solve \cite{ChristianBessiere2006}. The main goal is to choose one (or some) constraint(s) and analyzing \textit{local consistency}, which means trying to find values in the variables domain which make constraint unsatisfiable, in order to remove them from the domain. The applied procedure to reduce the variable domains is called \textit{reduction function}, and it is applied until a new, "smaller" and easier to solve is obtained, and it can not be further reduced: a \textit{fixed point}.
+
+\textit{Chaotic Iterations} is a technique, that comes from numerical analysis and adapted for computer science needs, used for computing limits of iterations of finite sets of functions \cite{Chazan1969, Cousot1977}. In \cite{Apt,Monfroy} a formalization of constraint propagation is proposed through {\it chaotic iterations}. In \cite{Monfroy2000}, a coordination-based chaotic iteration algorithm for constraint propagation is proposed. It is a scalable, flexible and generic framework for constraint propagation using coordination languages, not requiring special modeling of \csps. We can find an implementation of this algorithm in {\sc DICE} (Distributed Constraint Environment) \cite{Zoeteweij2003} using the {\sc Manifold} coordination language. Coordination services implement existing protocols for constraint propagation, termination detection and splitting of \csps. {\sc DICE} combines these protocols with support for parallel search and the grouping of closely related components into cooperating solvers.
+
+{\sc Manifold} is a strongly-typed, block-structured, event-driven language for managing events, dynamically changing interconnections among sets of independent, concurrent and cooperative processes. A {\sc Manifold} application consists of a number of processes running on a heterogeneous network. Processes in the same application may be written in different programming languages. {\sc Manifold} has been successfully used in a broad range of applications \cite{Arbab1995}.
+
+In \cite{Granvilliers2001} is proposed an implementation of constraint propagation by composition of reductions. It is a general algorithmic approach to tackle strategies that can be dynamically tuned with respect to the current state of constraint propagation, using composition operators. A composition operator models a sub--sequence of an iteration, in which the ordering of application of reduction functions is described by means of combinators for sequential, parallel or fixed--point computation, integrating smoothly the strategies to the model. This general framework provides a good level of abstraction for designing an object-oriented architecture of constraint propagation. Composition can be handled by the {\it Composite Design Pattern} \cite{DP_Composite}, supporting inheritance between elementary and compound reduction functions. The propagation mechanism uses the {\it Observer (Listener) Design Pattern} \cite{DP_Observer}, that makes the connection between domain modifications and re--invocation of reduction functions (event-based relations between objects); and the generic algorithm has been implemented using the {\it Strategy Design Pattern} \cite{DP_Strategy}, that allows to parametrize parts of algorithms.
+
+A propagation engine prototype with a \textit{Domain Specific Language} (DSL) was implemented in \cite{Prudhomme2013}. It is a solver--independent language able to configure constraint propagations at the modeling stage. The main contributions are a DSL to ease configure constraint propagation engines, and the exploitation of the basic properties of DSL in order to ensure both completeness and correctness of the produced propagation engine, like:	
+\begin{inparaenum}[i)]%\begin{itemize}
+	\item {\it Solver independent description}: The DSL does not rely on specific solver requirements (but assuming that solvers provide full access to variable and propagator properties), 
+	\item {\it Expressivity}: The DSL covers commonly used data structures and characteristics, 
+	\item {\it Extensibility}: New attributes can be introduced to make group definition more concise. New collections and iterators can provide new propagation schemes, 
+	\item {\it Unique propagation}: The top-bottom left-right evaluation of the DSL ensures that each arc is only represented once in the propagation engine.
+\end{inparaenum}%\end{itemize}
+
+Some characteristics are required to fully benefit from the DSL. Due to their positive impact on efficiency, modern constraint solvers already implement these techniques:
+\begin{inparaenum}[i)] %\begin{itemize}
+	\item Propagators are discriminated thanks to their priority (deciding which propagator to run next): lighter propagators (in the complexity sense) are executed before heavier ones.
+	\item A controller propagator is attached to each group of propagators.
+	\item Open access to variable and propagator properties: for instance, variable cardinality, propagator arity or propagator priority.
+\end{inparaenum}%\end{itemize}
+
+To be more flexible and more accurate, they assume that all arcs from the current \textit{CSP}, are explicitly accessible. This is achieved by explicitly representing all of them and associating them with {\it watched literals} \cite{Gent2006} (controlling the behavior of variable--value pairs to trigger propagation) or {\it advisors} \cite{Lagerkvist2007} (Method for supporting incremental propagation in propagator--centered setting). {\it Advisors} in \cite{Lagerkvist2007} are used to modify propagator state and to decide whether a propagator must be propagated or "scheduled". They also present a concrete implementation of the DSL based on {\it Choco} \cite{Jussien2008} (an open source java constraint programming library) and an extension of the \textit{MiniZinc}, a simple but expressive constraint programming modeling language which is suitable for modeling problems for a range of solvers. It is the most used language for codding \textit{CSP}s \cite{Nethercote}.
+
+However, we can not solve some \csps{} only applying constraint propagation techniques. It is necessary to combine them with other methods. 
+
+\section{Meta-heuristic methods}
+\label{sec:meta}
+
+{\it Meta-heuristic Methods} are non problem-specific techniques that efficiently explore the search space in order to find the solution, and can often find them with less computational effort than iterative methods, so an effective way to face the \csps. Their algorithms are approximate and usually non-deterministic.
+
+A {\it Meta-heuristic Method} is formally defined as an iterative generation process which guides a subordinate heuristic by combining smartly different concepts for \textit{exploring} (also called \textit{diversification}, is guiding the search process through a much larger portion of the search space with the hope of finding promising solutions that are not yet visited) and \textit{exploiting} (also called \textit{intensification}, is guiding the search process into a limited (but promising) region of the search space with the hope of improving a promising already found solution) the search space (the finite set of candidate solutions or configurations) \cite{Osman1996}, avoiding getting trapped in lost areas of the search space (local minimums). Sometimes they may make use of domain-specific knowledge in the form of heuristics that are controlled by the upper level strategy. Nowadays more advanced meta-heuristics use search experience to guide the search \cite{Blum2003}.
+
+They are often nature-inspired and are divided in two groups \cite{Boussaid2013}: 
+\begin{enumerate}%\begin{inparaenum}[i)]
+    \item {\it Single Solution Based:} more exploitation oriented, intensifying the search in some specific areas. (We will focus our attention on this first group)
+    \item {\it Population Based:} more exploration oriented, identifying areas of the search space where there are (or where there could be) the best solutions. % \cite{Maturana2012, Reeves2010, Dorigo2010}.
+\end{enumerate} %\end{inparaenum}
+
+\subsection{Single Solution Based Meta-heuristic}
+
+% you will focus on the first group => this is your thessi topic
+Methods of the first group are also called {\it trajectory methods}, and they are based on choosing a solution taking into account some criterion (usually random), and they move from a solution to his \textit{neighbor}, following a trajectory into the search space. They can be seen as an intelligent extension of \textit{Local Search Methods} \cite{Boussaid2013}. Local Search Methods are the most widely used approaches to solve \COPs{} because they often produces high--quality solutions in reasonable time.
+  
+{\it Simulated Annealing} (SA) \cite{Nikolaev2010} is one of the first algorithms with an explicit strategy to scape from local minima. Is a method inspired by the annealing technique used by the metallurgists to obtain a "well ordered" solid state of minimal energy. Its main feature is to allow moves resulting in solutions of worse quality than the current solution, in order to scape from local minima, under certain probability, which is decreased during the search process \cite{Blum2003}. In \cite{Anagnostopoulos2006} is presented a SA algorithm (TTSA) for the Traveling Tournament Problem (TPP) that explores both feasible and infeasible schedules that includes advanced techniques such as strategic oscillation to balance the time spent in the feasible and infeasible regions, by varying the penalty for violations; and reheats (increasing the temperature again) to balance the exploration of the feasible and infeasible regions and to escape local minima.
+
+{\it Tabu Search} (TS) \cite{Gendreau2010}, is among the most used meta-heuristics for \COPs. It explicitly maintain a history of the search, as a short term memory keeping track of the most recently visited solutions, to scape from local minima, to avoid cycles, and to deeply explore the search space. A TB meta-heuristic guides the search on the approach presented in \cite{IvanDotu2007} to solve instances of the \textit{Social Golfers} problem.
+
+The idea of {\it Guided Local Search} (GLS) \cite{Christos2010} is to dynamically change the objective function to help the search to gradually scape from local minima, by changing the search landscape. The set of solutions and the neighborhood are fixed, while the objective function is dynamically changed with the aim of making the current local optimum less attractive \cite{Blum2003}. In \cite{Mills2000} an implementation of a GLS is used to solve the satisfiability (SAT) problem, which is a special case of a \csp{} where the variables take booleans values an the constraints are disjunctions (logical OR) of literals (variables or theirs negations).
+
+The \textit{Variable Neighborhood Search} (VNS) is another meta-heuristic that systematically changes the size of neighborhood during the search process. These neighborhoods can be arbitrarily chosen, but often a sequence $\left|\mathcal{N}_1\right|<\left|\mathcal{N}_2\right|< \dots<\left|\mathcal{N}_{k_{max}}\right|$ of neighborhoods with increasing cardinality is defined. The choice of neighborhoods of increasing cardinality yields a progressive diversification of the search \cite{PierreNenad,Blum2003}. In \cite{Bouhmala2015} is introduced a \textit{generalized Variable Neighborhood Search} for \COPs, and in \cite{Burke2010} is presented a model combining integer programming and VNS for \textit{Constrained Nurse Rostering} problems.
+
+One meta-heuristic that can be efficiently implement on parallel processors is {\it Greedy Randomized Adaptive Search Procedures} (GRASP). GRASP is an iterative randomized sampling technique in which each iteration provides a solution to the target problem at hand through two phases (constructive and search) within each iteration: the first smartly constructs an initial solution via an adaptive randomized greedy function, and the second applies a local search procedure to the constructed solution in to find an improvement \cite{Feo95}. GRASP does not make any smart use of the history of the search process. It only stores the problem instance and the best found solution. That is why GRASP is often outperformed by other meta-heuristics \cite{Blum2003}. However, in \cite{Resende2009} some extensions like alternative solution construction mechanisms and techniques to speed up the search are presented.
+
+Galinier et al. present in \cite{Galinier04} a general approach for solving constraint based problems by local search. In this work, authors present the concept of {\it penalty functions}, that we pick up in order to write a \csp{} as an \textit{Unrestricted Optimization Problem} (UOP). This formulation was useful in this thesis for modeling the tackled benchmarks. In this formulation, the \textit{objective function} of this new problem must be such that its set of optimal solutions is equal to the solution set of the original (associated) \csp.
+
+\begin{definition}{\bf (Local penalty function)}
+\label{def:local_cost}
+Let a {\bf \csp} $\mathcal{P}\langle X,D,C \rangle$ and a configuration $S$ be. We define the operator {\bf local penalty function} as follow: 
+\begin{equation*}
+\begin{array}{l}
+	\omega_i:D\left(X\right)\times 2^{D\left(X\right)}\rightarrow\mathbb{R}^+\cup 0\text{ where: }\\
+	\omega_i\left(S,c_i\right)=\left\{
+	\begin{array}{lll}
+	0 & \text{ if } & c_i(S)\text{ is true }\\
+	k \in \mathbb{R}^+ & \text{ if not } &
+	\end{array}
+	\right.
+\end{array}
+\end{equation*}
+\end{definition}
+
+This penalty function defines the cost of a configuration with respect to a given constraint. In consequence, we define the \textit{global penalty function}, to define the cost of a configuration with respect to all constraint on a \csp:
+
+\begin{definition}{\bf (Global penalty function)}
+\label{def:global_cost}
+Let a {\bf \csp} $\mathcal{P}\langle X,D,C \rangle$ and a configuration $S$. We define the operator {\bf global penalty function} as follows: 
+\begin{equation*}
+\begin{array}{l}
+\Omega:D\left(X\right)\times 2^{D\left(X\right)}\rightarrow\mathbb{R}^+ \cup 0\text{ where: }\\
+\Omega\left(S,C\right)=\displaystyle\sum_{i=1}^{m}{\omega_i\left(S,c_i\right)}
+\end{array}
+\end{equation*}
+\end{definition}
+
+We can now formulate a \CSP{} as an {\it UOP}:
+
+\begin{definition}{\bf (CSP's Associated Unrestricted Optimization Problem)}
+\label{def:ass_CSP}
+Given a {\bf \csp} $\mathcal{P}\langle X,D,C \rangle$ we define its {\bf associated Unrestricted Optimization Problem} $\mathcal{P}_{opt}\langle X,D,f \rangle$ as follows: 
+\begin{equation*}
+\begin{array}{l}
+\displaystyle\min_{X} f\left(X,C\right)\\
+\text{Where:  } f\left(X,C\right) \equiv \Omega\left(X,C\right) \text{ is the objective function to be minimized over the variable } X
+\end{array}
+\end{equation*}
+\end{definition}
+
+It is important to note that a given $S$ is optimum if and only if $f\left(S,C\right) = 0$, which means that $S$ satisfies all the constrains in the original \csp{} $\mathcal{P}$.
+
+{\it Adaptive Search} is also another efficient algorithm based \textit{local search method}, that takes advantage of the structure of the problem in terms of constraints and variables. It uses also the concept of \textit{penalty function} and relies on iterative repair, based on this information, seeking to reduce the \textit{error} (a projected cost of a variable, as a measure of how responsible is the variable in the cost of a configuration) on the worse variable so far. It computes the penalty function of each constraint, then combines for each variable the \textit{errors} of all constraints in which it appears. This allows to chose the variable with the maximal \textit{error} will be chosen as a "culprit" and thus its value will be modified for the next iteration with the best value, that is, the value for which the total error in the next configuration is minimal \cite{Diaz, Codognet2001, Caniou14}. In \cite{Munera2015} Munera et al. based their solution method in \textit{Adaptive Search} to solve the \textit{Stable Marriage with Incomplete List and Ties} problem \cite{Iwama1999}, a natural variant of the \textit{Stable Marriage Problem} \cite{Gale1962}.
+
+Michel and Van Hentenryck \cite{Michel2002} propose a constraint-based, object-oriented, architecture to reduce the development time of local search algorithms significantly. The architecture consists of two main components: a declarative component which models the application in terms of constraints and functions, and a search component which specifies the meta-heuristic. Its main feature is to allow practitioners to focus on high-level modeling issues and to relieve them from many tedious and error-prone aspects of local search. The architecture is illustrated using {\sc Comet}, an optimization platform that provides a Java-like programming language to work with constraint and objective functions (a high level constraint programming) \cite{Comet, Michel2005}, that supports the local search architecture with a number of novel concepts, abstractions, and control structures.
+
+\subsection{Population Based Meta-heuristic}
+
+Also there exist heuristic methods based on populations. These methods do not work with a single solution, but with a set of solutions named {\it population}. In this other group we can find the {\it Evolutionary Algorithms}. This is the general definition to name the algorithms inspired by the "Darwin's principle", that says that only the best adapted individuals will survive. They involve {\it operators} to handle the population to guide it through the search process. The evolutionary algorithm's operators are another branch of study, because they have to be selected properly according to the specific problem, due to they will play an important roll in the algorithm behavior \cite{Maturana2012}. 
+
+Probably the most popular in this group are the {\it Genetic Algorithms} \cite{Reeves2010}, and theirs operators are based on the simulation of the genetic variation  process to achieve individuals (solutions in this case) more adapted; and the {\it Ant Colony} algorithms \cite{Dorigo2010}, that simulate the behavior of an ant swarm to find the shortest path from the food source to the nest.
+
+\section{Hyper-heuristic Methods}
+\label{sec:hyper}
+
+\textit{Hyper-heuristics} are automated methodologies for selecting or generating heuristics to solve hard computational problems \cite{Chakhlevitch2008}. This can be achieved with a learning mechanism that evaluates the quality of the algorithm solutions, in order to become general enough to solve new instances of a given problem. \textit{Hyper-heuristics} are related with the \textit{Algorithm Selection Problem}, so they establish a close relationship between a problem instance, the algorithm to solve it and its performance \cite{Ryser-welch}.   
+
+\textit{Hyper-heuristic frameworks} are also known as Algorithm-Portfolio-based frameworks, and their goal is predicting the running time of algorithms using statistical regression. Then the fastest predicted algorithm is used to solved the problem until a suitable solution is found or a time-out is reached \cite{Leyton-Brown2003}. In \cite{Samulowitz2013} is presented a \textit{Simple Neighborhood-based Algorithm Portfolio} written in \textit{Python} (Snappy), a very recent framework. Its aim is to provide a tool that can improve its own performances through on-line learning. Instead of using the traditional off-line training step, a neighborhood search predicts the performance of the algorithms.
+
+{\sc Hyperion}$^2$ \cite{Brownlee2014} is a Java$^{TM}$ framework for meta-- and hyper-- heuristics which allows the analysis of the trace taken by an algorithm and its constituent components through the search space, built with the principles of interoperability, generality and efficiency. The main goals of {\sc Hyperion}$^2$ are:
+\begin{enumerate} %\begin{inparaenum}[i)]
+\item Promoting interoperability via component interfaces,
+\item Allowing rapid prototyping of meta-- and hyper-- heuristics, with the potential to use the same source code in either case,
+\item Providing generic templates for a variety of local search and evolutionary computation algorithms,
+\item Making easier the construction of novel meta- and hyper- heuristics by hybridization (via interface interoperability) or extension (subtype polymorphism),
+\item {\it Only pay for what you use} -- a design philosophy that attempts to ensure that generality doesn't necessarily imply inefficiency.
+\end{enumerate}%\end{inparaenum}
+
+\textit{hMod} is inspired by the previous frameworks, and using a new object-oriented architecture, encodes the core of the hyper-heuristic in several modules, referred as algorithm containers. \textit{hMod} directs the programmer to define the heuristic using two separate XML files; one for the heuristic selection process and another one for the acceptance criteria \cite{Urra2013}.
+
+\textit{Evolving evolutionary algorithms} are specialized hyper-heuristic method which attempt to readjust an evolutionary algorithm to the problem needs. An Evolutionary Algorithm (EA) discover the rules and knowledge, to find the best algorithm to solve a problem. In \cite{Diosan2009} is used linear genetic programming and multi-expression genetic programming, to optimize the EA solving unimodal mathematical functions and another EA adjusts the sequence of genetic and reproductive operators. A solution consists of a new evolutionary algorithm capable of outperforming genetic algorithms when solving a specific class of unimodal test functions. 
+
+\section{Hybridization}
+\label{sec:hybrid}
+
+The \textit{Hybridization} approach is the one who combine different approaches into the same solution strategy, and recently, it leads to very good results in the constraint satisfaction field. For example, constraint propagation may find a solution to a problem, but they can fail even if the problem is satisfiable, because of its local nature. At each step, the value of a small number of variables are changed, with the overall aim of increasing the number of constraints satisfied by this assignment, and applying other techniques to avoid local solutions, for example adding a stochastic component to choose variables to affect. Integrations of global search (complete search) with local search have been developed, leading to hybrid algorithms. 
+
+Hooker J.N. presents in \cite{Hooker2012} some ideas to illustrate the common structure present in exact and heuristic methods, to encourage the exchange of algorithmic techniques between them. The goal of this approach is to design solution methods ables to smoothly transform its strategy from exhaustive to non-exhaustive search as the problem become more complex.
+
+In \cite{El-Ghazali2013} a taxonomy of hybrid optimization algorithms is presented in an attempt to provide a mechanism to allow qualitative comparison of hybrid optimization algorithms, combining meta-heuristics with other optimization algorithms from mathematical programming, machine learning and constraint programming.
+
+Monfroy et al. present in \cite{Monfroya,Monfroyb} a general hybridization framework is proposed to combine complete constraints resolution techniques with meta-heuristic optimization methods in order to reduce the problem through domain reduction functions, ensuring not loosing solutions. Other interesting ideas are {\sc Templar}, a framework to generate algorithms changing predefined components using hyper-heuristics methods \cite{Swan2015}; and {\it ParadisEO}, a framework to design parallel and distributed hybrid meta-heuristics showing very good results \cite{Cahon2004}, including a broad range of reusable features to easily design evolutionary algorithms and local search methods.
+
+Another technique has been developed, the called {\it autonomous search}, based on the supervised or controlled learning. This systems improve their functioning while they solve problems, either  modifying their internal components to take advantage of the opportunities in the search space, or to adequately chose the solver to use ({\it portfolio point of view}) \cite{WhatIsAuto}.
+
+In \cite{Amadini2014} is proposed another portfolio-based technique, \textit{time splitting}, to solve optimization problems. Given a problem \textit{P} and a schedule $Sch = \left[(\Sigma_1, t_1),\dots,(\Sigma_n, t_n)\right]$ of \textit{n} solvers, the corresponding time-split solver is defined as a particular solver such that:  
+\begin{enumerate}[label=\alph*)]
+\item runs $\Sigma_1$ on \textit{P} for a period of time $t_1$, 
+\item then, for $i = 1,\dots, n-1$, runs $\Sigma_{i+1}$ on \textit{P} for a period of time $t_{i+1}$ exploiting or not the best solution found by the previous solver $\Sigma_i$ $t_i$ units of time.
+\end{enumerate}
+
+% COMENTAR 
+%Nowadays there exists some tools to face this kind of problems. We can cite {\sc Choco}, an open source java constraint programming library \cite{Jussien2008}; ; ; {\sc Adaptive Search}, a constraint-based local search methods \cite{Diaz}; among others.
+
+% Citas estas cosas en la parte donde propongo mi modelado :D
+
+%COMENTAR   
+%There exist also tools for modeling \textit{CSP} problems. Some of them intent to be a standards in terms of problem modeling.  Codding the problems using one of these tools (or both), it gives us the advantage of solving them using many solvers that support those languages. Furthermore, developing our own solver, it is also interesting to use them because we can test and compare our results using a wide range of available problems. 
+
+In \cite{Amadini} is proposed a tool (\texttt{xcsp2mzn}) for converting problem instances from the {\sc XCSP}\footnote{Is a XML-like language for coding \csps. Is not more used than {\sc MiniZinc} but although it was mainly used as the standard in the {\it International Constraint Solver Competition} (ended in 2009), the {\it ICSC} dataset is for sure the biggest dataset of CSP instances existing today} format  \cite{Committee} to {\sc MiniZinc} that is a simple but expressive constraint programming modeling language which is suitable for modeling problems for a range of solvers. It is the most used language for codding \csps{} \cite{Nethercote}. The second contribution of this work is the development of \texttt{mzn2feat} a tool to extract static and dynamic features from the {\sc MiniZinc} representation, with the help of the {\sc Gecode}\footnote{Is an efficient open source environment for developing constraint-based system and applications.} \cite{Gecode} interpreter, and allows a better and more accurate selection of the solvers to be used according to the instances to solve. Some results are showed proposing that the performances that can be obtained using these features are competitive with state of the art on \csp{} portfolio techniques.
+
+%\nocite{Choco, Comet, CometPascal, Gecode, XCSP, Features, Minizinc, X10}
+
+\section{Parallel computing}
+\label{sec:parallel}
+
+Parallel computing is a way to solve problems using some calculus resources at the same time. It is a powerful alternative to solve problems which would require too much time by using the traditional ways, i.e., sequential algorithms \cite{Grama2003}. That is why this field is in constant development and it is the topic where we will put most of our effort. 
+
+For a couple of years, all processors in modern machines are multi-core. Massively parallel architectures, previously expensive and so far reserved for super--computers, become now a trend available to a broad public through hardware like the Xeon Phi or GPU cards. The power delivered by massively parallel architectures allow us to treat faster these problems \cite{Borkar2007}. However this architectural evolution is a non-sense if algorithms do not evolve at the same time: the development and the implementation of algorithms should take this into account and tackling the problems with very different methods, changing the sequential reasoning of researchers in Computer Science \cite{Hill2008, Sanders2014}. We can find in \cite{Diaz2012} a survey of the different parallel programming models and available tools, emphasizing on their suitability for high-performance computing.
+
+Falcou propose in \cite{Falcou2009} a programming model: \textit{Parallel Algorithmic Skeletons} (along with a C++ implementation called {\sc Quaff} to make parallel application development easier. Writing efficient code for parallel machines is less trivial, as it usually involves dealing with low-level APIs such as OpenMP, message-passing interfaces (MPI), among others. However, years of experience have shown that using those frameworks is difficult and error-prone. Usually many undesired behaviors (like deadlocks) make parallel software development very slow compared to the classic, sequential approach. In that sense, this model is a high-order pattern to hide all low-level, architecture or framework dependent code from the user, and provides a decent level of organization. {\sc Quaff} is a skeleton-based parallel programming library, which has demonstrated its efficiency and expressiveness solving some application from computer vision, that relies on C++ template meta-programming to reduce the overhead traditionally associated with object-oriented implementations of such libraries: the code generation is done at compile time.
+
+Some results have been obtained on this field. The contribution in terms of hardware has been crucial, achieving powerful technologies to perform large--scale calculations. But the development of the techniques and algorithms to solve problems in parallel is also visible, focusing the main efforts in three fundamentals concepts: 
+\begin{enumerate}%\begin{inparaenum}[i)]
+    \item {\it Problem subdivision},
+    \item {\it Scalability} and
+    \item {\it Inter-process communication}.
+\end{enumerate}%\end{inparaenum}
+
+In a preliminary review of literature on parallel constraint solving \cite{Gent}, addressing the literature in constraints on exploitation of parallel systems for constraint solving, is starting first by looking at the justification for the multi-core architecture. The direction it is most likely to take and limiting factors on performance such as \textit{Amdahl}'s law, and then reviewing recent literature on parallel constraint programming. For their part, they group the paper into four areas: 
+\begin{inparaenum}[i)]
+	\item parallelizing the search process,  
+	\item parallel and distributed arc-consistency, 
+	\item multi-agent and cooperative search and
+	\item combined parallel search and parallel consistency.
+\end{inparaenum}
+
+The issue of sub-dividing a given problem in some smaller sub-problems is sometimes not easy to address. Even when we can do it, the time needed by each process to solve its own part of the problem is rarely balanced. In \cite{Rezgui2013} are proposed some techniques to tackle this problem, taking into account that sometimes, the more can be sub-divided a problem, the more balanced will be the execution times of the process. In \cite{Kishimoto2013} is presented an comparison between Transposition-table Driven Scheduling (TDS) and a parallel implementation of a best-first search strategy (Hash Distributed A$^*$), that uses the standard approach of of \textit{Work Stealing} for partitioning the search space. This technique is based on maintaining a local work queue, (provided by a \textit{root process} through hash-based distribution that assign an unique processor to each work) accessible to other process that "steal" work from if they become unoccupied. The same approach is used in \cite{Jinnai} to evaluate \textit{Zobrist Hashing}, an efficient hash function designed for table games like chess and Go, to mitigate communication overheads.
+
+In \cite{Arbelaez2012} is presented a study of the impact of space-partitioning techniques on the performance of parallel local search algorithms to tackle the \textit{k-medoids} clustering problem. Using a parallel local search, this work aims to improve the scalability of the sequential algorithm, which is measured in terms of the quality of the solution within the same time with respect to the sequential algorithm. Two main techniques are presented for domain partitioning: first, {\it space-filling curves}, used to reduce any N-dimensional representation into a one-dimension space (this technique is also widely used in the nearest-neighbor-finding problem \cite{Chen2005}); and second, {\it k-Means} algorithm, one of the most popular clustering algorithms \cite{Berkhin2002}.
+
+In \cite{Arbab2000} is proposed a mechanism to create sub-\csps{} (whose union contains all the solutions of the original \csp) by splitting the domain of the variables though communication between processes. The contribution of this work is explained in details in section \ref{sec:cooperation}.
+
+Related to the search process, we can find two main approaches. First, the {\it single walk} approach, in which all the processes try to follow the same path towards the solution, solving their corresponding part of the problem, with or without cooperation (communication). The other is known as {\it multi walk}, and it proposes the execution of various independent processes to find the solution. Each process applies its own strategies (portfolio approach) or simply explores different places inside the search space. Although this approach may seem too trivial and not so smart, it is fair to say that it is in fashion due to the good obtained results using it \cite{Diaz}.
+
+\textit{Scalability} is the ability of a system to handle the increasing growth of workload. A system which has improved over time its performance after adding work resources, and it is capable of do it proportionally is called {\it scalable}. The increase has not been only in terms of calculus resources, but also in the amount of sub-problems coming from the sub-division of the original problem. The more we can divide a problem into smaller sub-problems, the faster we can solve it \cite{Hill}. \textit{Adaptive Search} is a good example of local search method that can scale up to a larger number of cores, e.g., a few hundreds or even thousands \cite{Diaz}. For this algorithm, an implementation of a cooperative multi-walks strategy has been published in \cite{Munera}. In this framework, the processes are grouped in teams to achieve search intensification, which cooperate with others teams through a head node (process) to achieve search diversification. Using an adaptation of this method, Munera et al. propose a parallel solution strategy able to solve hard instances of \textit{Stable Marriage with Incomplete List and Ties Problem} quickly. In \cite{Munera2016} is presented a combination of this method with an \textit{Extremal Optimization} procedure: a nature-inspired general-purpose meta-heuristic \cite{Boettcher2000}. 
+
+A lot of studies have been published around this topic. A parallel solver for numerical \csps{} is presented in \cite{Ishii2014} showing good results scaling on a number of cores. In \cite{Truchet02}, an estimation of the speed-up (a performance measure of a parallel algorithm) through statistical analysis of its sequential algorithm is presented. This is a very interesting result because it a way to have a rough idea of the resources needed to solve a given problem in parallel.
+
+Another issue to treat is the interprocess communication. Many times a close collaboration between process is required, in order to achieve the solution. But the first inconvenient is the slowness of the communication process. Some work have achieved to identify what information is viable to share. One example is \cite{Hamadi2012} where an idea to include low-level reasoning components in the SAT problems resolution is proposed. This approach allow us to perform the clause-shearing, controlling the exchange between any pair of process.
+
+In \cite{Munera} is presented a new paradigm that includes cooperation between processes, in order to improve the independent multi-walk approach. In that case, cooperative search methods add a communication mechanism to the independent walk strategy, to share or exchange information between solver instances during the search process. This proposed framework is oriented towards distributed architectures based on clusters of nodes, with the notion of {\it teams} running on nodes and controlling several search engines ({\it explorers}) running on cores, and the idea that all teams are distributed and thus have limited inter--node communication. The communication between teams ensures diversification, while the communication between explorers is needed for intensification. This framework is oriented towards distributed architectures based on clusters of nodes, where teams are mapped to nodes and explorers run on cores. This framework was developed using the {\it X10 programming language}, which is a novel language for parallel processing developed by IBM Research, giving more flexibility than traditional approaches, e.g., MPI communication package.
+
+In \cite{Frank2003} have been presented an implementation of the meta-solver framework which coordinates the cooperative work of arbitrary pluggable constraint solvers. This approach intents to integrate arbitrary, new or pre--existing constraint solvers, to form a system capable of solving complex mixed--domain constraint problems. The existing increased cooperation overhead is reduced through problem-specific cooperative solving strategies.
+
+In \cite{Hamadi2011} is proposed the first {\it Deterministic Parallel DPLL} (A complete,  backtracking-based search algorithm for deciding the satisfiability of propositional logic formulas in conjunctive normal form) engine. The experimental results show that their approach preserves the performance of the parallel portfolio approach while ensuring full reproducibility of the results. Parallel exploration of the search space, defines a controlled environment based on a total ordering of solvers interactions through synchronization barriers. To maximize efficiency, information exchange (conflict-clauses) and check for termination are performed on a regular basis. The frequency of these exchanges greatly influences the performance of the solver. The paper explores the trade off between frequent synchronizing which allows the fast integration of foreign conflict--clauses at the cost of more synchronizing steps, and infrequent synchronizing at the cost of delayed foreign conflict--clauses integration.
+
+Considering the problem of parallelizing restarted back--track search, in \cite{Cire2011} was developed a simple technique for parallelizing restarted search deterministically and it demonstrates experimentally that it can achieve near--linear speed--ups in practice, when the number of processors is constant and the number of restarts grows to infinity. They propose the following: Each parallel search process has its own local copy of a scheduling class which assigns restarts and their respective fail--limits to processors. This scheduling class computes the next {\it Luby} restart fail--limit and adds it to the processor that has the lowest number of accumulated fails so far, following an {\it earliest--start--time--first strategy}. Like this, the schedule is filled and each process can infer which is the next fail--limit that it needs to run based on the processor it is running on -- without communication. Overhead is negligible in practice since the scheduling itself runs extremely fast compared to CP search, and communication is limited to informing the other processes when a solution has been found.
+
+In \cite{Guo2010}, were explored the two well--known principles of diversification and intensification in portfolio--based parallel SAT solving. To study their trade--off, they define two roles for the computational units. Some of them classified as {\it Masters} perform an original search strategy, ensuring diversification. The remaining units, classified as {\it Slaves} are there to intensify their master's strategy. There are some important questions to be answered:
+\begin{inparaenum}[i)]
+	\item what information should be given to a slave in order to intensify a given search effort?, 
+	\item how often, a subordinated unit has to receive such information? and 
+	\item the question of finding the number of subordinated units and their connections with the search efforts? 
+\end{inparaenum}
+The results lead to an original intensification strategy which outperforms the best parallel SAT solver {\it ManySAT}, and solves some open SAT instances.
+
+Multi-objective optimization problems involve more than one objective function to be optimized simultaneously. Usually these problems do not have an unique optimal solution because the exist a trade-off between one objective function and the others. For that reason, in a multi-objective optimization problem, the concept of Pareto optimal points is used. A Pareto optimal point is a solution that improving one objective function value, implies the deterioration of at least one of the other objective function. A collection of Pareto optimal points defines a Pareto front. In \cite{Yasuhara2015}, is proposed a new search method, called \textit{Multi-Objective Embarrassingly Parallel Search} (MO--EPS) to solve multi-objective optimization problems, based on: 
+\begin{inparaenum}[i)]
+	\item Embarrassingly Parallel Search (EPS): where the initial problem is split into a number of independent sub-problems, by partitioning the domain of decision variables \cite{Rezgui2013, Regin2014}; and
+	\item Multi-Objective optimization adding cuts (MO--AC): an algorithm that transforms the multi-objective optimization problem into a feasibility one, searches a feasible solution and then the search is continued adding constraints to the problem until either the problem becomes infeasible or the search space gets entirely explored \cite{Kotecha2010}.
+\end{inparaenum}
+
+A component-based constraint solver in parallel is proposed in \cite{Zoeteweij}. In this work, a parallel solver coordinates autonomous instances of a sequential constraint solver, which is used as a software component. The component solvers achieve load balancing of tree search through a time-out mechanism. It is implemented a specific mode of solver cooperation that aims at reducing the turn-around time of constraint solving through parallelization of tree search. The main idea is to try to solve a \csp{} before a time-out. If it can not find a solution, the algorithm defines a set of disjoint sub-problems to be distributed among a set of solvers running in parallel. The goal of the time-out mechanism is to provide an implicit load balancing: when a solver is busy, and there are no subproblems available, another solver produces new sub-problems when its time-out elapses.
+
+
+%COMENTAR
+%Some other efforts have been allocated in the exploitation of the power of calculus provided by the massively parallel architecture of the Graphic Processing Unit (GPU). In \cite{Arbelaez} are presented  implementations of efficient (and very fast) constraint-based local search solvers using GPU.
+%\textcolor{green}{[not finished yet]}
+%\nocite{GPU}
+
+\section{Solvers cooperation}
+\label{sec:cooperation}
+
+The interaction between solvers exchanging some information is called {\it solver cooperation} and it is very popular in this field due to their good results. Its main goal is to improve some kind of limitations or inefficiency imposed by the use of unique solver. In practice, each solver runs in a computation unit, i.e. thread or processor. The cooperation is performed through inter--process communication, by using different methods: \textit{signals}, asynchronous notifications between processes in order to notify an event occurrence; \textit{semaphore}, an abstract data type for controlling access, by multiple processes, to a common resource; \textit{shared memory}, a memory simultaneously accessible by multiple processes; \textit{message passing}, allowing multiple programs to communicate using messages; among others.
+
+Kishimoto et al. present in \cite{Kishimoto2009} a parallelization of the an algorithm A$^*$ (Hash Distributed A$^*$) for \textit{optimal sequential planning} \cite{Schmegner2004}, exploiting distributed memory computers clusters, to extract significant speedups from the hardware. In classical planning solving, both the memory and the CPU requirements are main causes of performance bottlenecks, so parallel algorithms have the potential to provide required resources to solve changeling instances. In \cite{Kishimoto2013}, authors study scalable parallel best-first search algorithms, using MPI, a paradigm of \textit{Message Passing Interface} that allows parallelization, not only in distributed memory based architectures, but also in shared memory based architectures and mixed environments (clusters of multi-core machines) \cite{Grama2003a}.
+
+In \cite{Pajot2003} is presented a paradigm that enables the user to properly separate computation strategies from the search phases in solver cooperations. The cooperation must be supervised by the user, through {\it cooperation strategy language}, which defines the solver interactions in order to find the desired result.
+
+In \cite{Hamadi2012}, an idea to include low-level reasoning components in the SAT problems resolution is proposed, dynamically adjusting the size of shared clauses to reduce the possible blow up in communication. \cite{Pajot2003} presents a paradigm that enables the user to properly separate strategies combining solver applications in order to find the desired result, from the way the search space is explored. 
+
+{\it Meta--S} is an implementation of a theoretical framework proposed in \cite{Frank2003}, which allows to tackle problems, through the cooperation of arbitrary domain--specific constraint solvers. {\it Meta--S} \cite{Frank2003} is a practical implementation and extension of a theoretical framework, which allows the user to attack problems requiring the cooperation of arbitrary domain--specific constraint solvers. Through its modular structure and its extensible strategy specification language it also serves as a test--bed for generic and problem--specific (meta--)solving strategies, which are employed to minimize the incurred cooperation overhead. Treating the employed solvers as black boxes, the meta--solver takes constraints from a global pool and propagates them to the individual solvers, which are in return requested to provide newly gained information (i.e. constraints) back to the meta--solver, through variable projections. The major advantage of this approach lies in the ability to integrate arbitrary, new or pre--existing constraint solvers, to form a system that is capable of solving complex mixed--domain constraint problems, at the price of increased cooperation overhead. This overhead can however be reduced through more intelligent and/or problem--specific cooperative solving strategies. {\sc Hyperion} \cite{Brownlee2014} is an already mentioned framework for meta-- and hyper--heuristics built with the principle of interoperability, generality by providing generic templates for a variety of local search and evolutionary computation algorithms and efficiency, allowing rapid prototyping with the possibility of reusing source code.
+
+Arbab and Monfory propose in \cite{Arbab2000} a technique to guide the search by splitting the domain of variables. A \textit{Master} process builds the network of variables and domain reduction functions, and sends this informations to the worker agents. They workers concentrate their efforts on only one sub-CSP and the \textit{Master} collects solutions. The main advantage is that by changing only the search agent, different kinds of search can be performed. The coordination process is managing using the {\sc Manifold} coordination language \cite{Arbab1995}.
+
+\section{Parameter setting techniques}
+\label{sec:tunning}
+
+Most of these methods to tackle combinatorial problems, involve a number of parameters that govern their behavior, and they need to be well adjusted, and most of the times they depend on the nature of the specific problem, so they require a previous analysis to study their behavior \cite{Birattari2005}. That is way another branch of the investigation arises: {\it parameter tuning}. It is also known as a meta optimization problem, because the main goal is to find the best solution (parameter configuration) for a program, which will try to find the best solution for some problem as well. In order to measure the quality of some found parameter setting for a program (solver), one of these criteria are taken into consideration: the speed of the run or the quality of the found solution for the problem that it solves.
+
+The are tow classes to classify these methods: 
+\begin{enumerate}
+\item \textit{Off-line tunning}: Also known just as parameter tuning, were parameters are computed before the run.
+\item \textit{On-line tunning}: Also known as parameter control, were parameters are adjusted during the run, and
+\end{enumerate}
+
+\subsection{Off-line tunning}
+
+The technique of parameter tuning or off-line tunning, is used to computed the best parameter configuration for an algorithm before the run (solving a given instance of a problem), to obtain the best performance. Most of algorithms are very sensible to their parameters. This is the case of Evolutionary Algorithms (EA), were some parameters define the behavior of the algorithm. In \cite{A.E.Eiben2012} is presented a study of methods to tune these algorithms.
+
+In \cite{Riff2013} is presented \textit{EVOCA}, a tool which allows meta-heuristics designers to obtain good results searching a good parameter configuration with no too much effort, by using the tool during the iterative design process. Holger H. Hoos highlights in \cite{Hoos2012} the efficacy of the technique named {\it racing procedure}, that is based on choosing a set of model problems and adjusting the parameters through a certain number of solver runs, discarding configurations that show a behavior substantially worse than the best already obtained so far. 
+
+{\sc ParamsILS} (version 2.3) is a tool for parameter optimization for parametrized algorithms, which uses powerful stochastic local search methods and it has been applied with success in many combinatorial problems in order to find the best parameter configuration \cite{Hutter2009}. It is an open source program written in {\it Ruby}, and the public source include some examples and a detailed and complete User Guide with a compact explanation about how to use it with a specific solver \cite{Hutter2008}.
+
+{\sc Revac} is a method based on information theory to measure parameter relevance, that calibrates the parameters of EAs in a robust way. Instead of estimating the performance of an EA for different parameter values, the method estimates the expected performance when parameter values are chosen from a given probability density distribution $C$. The method iteratively refines the probability distribution $C$ over possible parameter sets, and starting with a uniform distribution $C_0$ over the initial parameter space $\mathcal{X}$, the method gives a higher and higher probability to regions of $\mathcal{X}$ that increase the expected performance of the target EA \cite{Nannen2007}. In \cite{Smit2010} is presented a case study demonstrating that using the {\sc Revac} the "world champion" EA (the winner of the CEC-2005 competition) can be improved with few effort.
+
+Another technique was successfully used to tune automatically parameters for EAs, through a model based on a {\it case-based reasoning} system. It attempts to imitate the human behavior in solving problems: look in the memory how we have solved a similar problem \cite{Yeguas2014} .
+
+\subsection{On-line tunning}
+
+Although parameter tunning shows to be an effective way to adjust parameters to sensibles algorithms, in some problems the optimal parameter settings may be different for various phases of the search process. This is the main motivation to use on-line tuning techniques to find the best parameter setting, also called \textit{Parameter Control Techniques}. Parameter control techniques are further divided into 
+\begin{inparaenum}[i)]
+\item \textit{deterministic parameter control}, where the value of a strategy parameter is altered by some deterministic rule, ignoring any feedback; 
+\item \textit{adaptive parameter control}, which continually update their parameters using feedback from the population or the search, and this feedback is used to determine the direction or magnitude of the parameter changes; and 
+\item \textit{self-adaptive parameter control}, which assign different parameters to each individual, Here the parameters to be adapted are coded into the chromosomes that undergo mutation and recombination, but these parameters are coded into the chromosomes that undergo mutation and recombination
+\end{inparaenum}\cite{Eiben1999}.
+
+Differential Evolution (DE) algorithm has been demonstrated to be an efficient, effective and robust optimization method. However, its performance is very sensitive to the parameters setting, and this dependency changes from problem to problem. The selection of proper parameters for a particular optimization problem is a quite complicate subject, especially in the multi-objective optimization field. This is the reason why many researchers are motivated to develop techniques to set the parameters automatically.
+
+Liu et al. propose in \cite{Liu2005} an adaptive approach which uses fuzzy logic controllers to guide the search parameters, with the novelty of changing the mutation control parameter and the crossover during the optimization process. A self-adaptive DE (SaDE) algorithm is proposed in \cite{Qin2009}, where both trial vector generation strategies and their associated control parameter values are gradually adjusted by learning from the way they have generated their previous promising solutions, eliminating this way the time-consuming exhaustive search for the most suitable parameter setting. This algorithm has been generalized to multi-objective realm, with objective-wise learning strategies (OW-MOSaDE) \cite{Huang2009}.
+
+Drozdik et al. present in \cite{Drozdik} a study of various approaches to find out if one can find an inherently better one in terms of performance and whether the parameter control mechanisms can find favorable parameters in problems which can be successfully optimized only with a limited set of parameters. They focused in the most important parameters: 
+\begin{inparaenum}[1)]
+\item the \textit{scaling factor}, which controls the structure of new invidious; and
+\item the \textit{crossover probability}.
+\end{inparaenum}
+
+{\sc Meta-GAs} \cite{Clune2005} is a genetic self-adapting algorithm, adjusting genetic operators of genetic algorithms. In this paper the authors propose an approach of moving towards a Genetic Algorithm that does not require a fixed and predefined parameter setting, because it evolves during the run.
+

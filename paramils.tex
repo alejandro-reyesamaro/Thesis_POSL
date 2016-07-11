@@ -1,0 +1,612 @@
+
+%\textcolor{green}{
+%My idea here is to present the work with ParamILS. I worked with the sets of training and test instances, and I think that the key is there, because I obtained a little change in the parameters configuration. The other point is that maybe Costas Array is not a good example to work, because the difference between the runs are too small. I hope that working with other problems, including more training instances, we can obtain better results.}
+
+% short paragraph: about autotuning of parameters; work in progress.
+
+Another performed study was applying {\sc ParamILS} (version 2.3), a tool to find the optimum parameter settings for parametrized algorithms \cite{Hutter2009}, to {\it Adaptive Search} solver. It is an open source program (project) in {\it Ruby}, and the public source code include some examples and a detailed and complete User Guide with a compact explanation about how to use it with a specific solver \cite{Hutter2008}. 
+
+The first thing we had to do was building a {\it wrapper} to be able to use the tool. This wrapper was coded in C++ language. 
+
+%We start in March 2014 experimenting with the {\it Costas Array} problem, using different sizes as training instances set.
+
+\nocite{Rickard}
+
+Tacking advantage of the fact that we have already built a wrapper to our solver, the next step can be tuning more interesting problems and after that, using the tool to tune the solver but not only to find the best parameter configuration for a specific problem, but also the best parameter configuration to solve any of the benchmarking (a general parameter configuration).
+
+In a first study, we decided to work with the parameters detailed in Table \ref{table:param}.
+
+\begin{table}[ht] 
+\caption{Adaptive Search parameters}
+\centering 
+\begin{tabular}{c c l}
+\hline\hline
+Parameter & Type & Description \\ [0.5ex]
+\hline
+-P & PERCENT & probability to select a local min (instead of staying on a plateau) \\
+-f & NUMBER & freeze variables of local min for NUMBER swaps \\ 
+-F & NUMBER & freeze variables swapped for NUMBER swaps \\ 
+-l & LIMIT & reset some variables when LIMIT variable are frozen \\ 
+-p & PERCENT & reset PERCENT of variables \\ [1ex]
+\hline
+\end{tabular} 
+\label{table:param}
+\end{table} 
+
+In this document, we explain in details the implementation and experimentation process.
+
+\section{ParamILS\_2.3}
+
+{\sc ParamILS} is a open source program (project) in {\it Ruby}. It can be downloaded from 
+
+\begin{center}
+	\texttt{http://cs.ubc.ca/labs/beta/Projects/ParamILS}. 
+\end{center}
+
+The \texttt{zip} file includes some examples that you can run and see how the tool works. It In addition, it brings a complete User Guide with a compact explanation about how to use it with a specific solver. 
+
+\section{Using ParamILS}
+
+To use the tool {\sc ParamILS}, we have installed Ruby 1.8.7 in our computer. In this firs step, we are using a laptop with {\sc ubuntu 14.4} but our idea is to make some tests in {\it Curiosiphi}\footnote{...}.
+
+To run the tool, we need to use the following command line:
+
+\begin{verbatim}
+$ ruby param_ils_2_3_run.rb -numRun 0 -scenariofile 
+      /.../<scenario_file> -validN 100
+\end{verbatim}
+
+
+All the information that {\sc ParamILS} needs to tune the solver has to be written in the file \texttt{$<$scenario\_file$>$}. We explain its content in the next section.
+
+\section{Tuning scenario files}
+
+The {\it tuning scenario file} is a text file with all the information concerning to how to tune the solver with {\sc ParamILS}. It includes where to find the solver binary, the parameter domains, etc. In our case, the {\it tuning scenario file} looks like the following:
+
+\begin{shadedbox}
+	\texttt{algo = ./QtWrapper\_wrapper\\
+		execdir = /.../src \\
+		deterministic = 0 \\
+		run\_obj = runtime \\
+		overall\_obj = mean \\
+		cutoff\_time = 50.0 \\
+		cutoff\_length = max \\
+		tunerTimeout = 3600 \\
+		paramfile = instances/all\_intervals-params.txt \\
+		outdir = instances/all\_intervals-paramils-out \\
+		instance\_file = instances/.../all\_intervals-lower-instances.txt \\
+		test\_instance\_file = instances/.../all\_intervals-upper-instances.txt \\
+	}
+\end{shadedbox}
+
+Next, we will explain in details what each line in this file means:
+
+\begin{itemize}
+	\item {\bf algo} An algorithm executable or a call to a wrapper script around an algorithm that conforms with the input/output format of ParamILS. (our wrapper)
+	\item {\bf execdir} Directory to execute \texttt{algo} from: "cd $<$\texttt{execdir}$>$; $<$\texttt{algo}$>$" 
+	\item {\bf run\_obj} A scalar quantifying how "good" a single algorithm execution is, such as its required runtime.
+	\item {\bf overall\_obj} While {\bf run\_obj} defines the objective function for a single algorithm run, {\bf overall\_obj} defines how those single objectives are combined to reach a single scalar value to compare two parameter configurations. Implemented examples include \texttt{\bf mean}, \texttt{\bf median}, \texttt{\bf q90} (the 90\% quantile), \texttt{\bf adj\_mean} (a version of the mean accounting for unsuccessful runs: total runtime divided by number of successful runs), \texttt{\bf mean1000} (another version of the mean accounting for unsuccessful runs: (total runtime of successful runs + 1000 x runtime of unsuccessful runs) divided by number of runs -- this effectively maximizes the number of successful runs, breaking ties by the runtime of successful runs; it is the criterion used in most of Frank experiments), and \texttt{\bf geomean} (geometric mean, primarily used in combination with \texttt{\bf run\_obj} = \texttt{speedup}. The empirical statistic of the cost distribution (across multiple instances and seeds) to be minimized, such as the mean (of the single run objectives). \footnote{We use  \texttt{\bf mean} but maybe we can experiment with other values}.
+	\item {\bf cutoff\_time} The time after which a single algorithm execution will be terminated unsuccessfully. This is an important parameter: if chosen too high, lots of time will be wasted with unsuccessful runs. If chosen too low the optimization is biased to perform well on easy instances only.
+	\item {\bf tunerTimeout} The timeout of the tuner. Validation of the final best found parameter configuration starts after the timeout.
+	\item {\bf paramfile} Specifies the file with the parameters of the algorithms. 
+	\item {\bf outdir} Specifies the directory ParamILS should write its results to.
+	\item {\bf instance\_file} Specifies the file with a list of training instances. 
+	\item {\bf test\_instance\_file} Specifies the file with a list of test instances.
+\end{itemize}
+
+Another important file that we have to compose properly is the {\it algorithm parameter file}, just following the instruction from \cite{Hutter2008} --\textit{[...] each line lists one parameter, in curly parentheses the possible values considered, and in square parentheses the default value [...]}. Our {\it algorithm parameter file} looks like this:\\
+
+\begin{shadedbox}
+	\texttt{P \{20, 25, 30, 35, 40, 45, 50, 55, 60\} [50]\\
+		f \{0, 1, 2, 3\} [1]\\
+		F \{0, 1, 2, 3\} [0]\\
+		l \{0, 1, 2, 3\} [1]\\
+		p \{1, 2, 3, 5, 10, 20\} [5]
+	}
+\end{shadedbox}
+
+In the actual {\it Adaptive Search} implementation, the solver binary file and the problem instance are the same thing. It means that we only have to use the following command to solve the {\it All---intervals} problem of size $K$: 
+
+\begin{center}
+	\texttt{\$ ./all-intervas K}
+\end{center}
+
+So, to use {\sc ParamILS} we modified a little our code: now our solver takes the size parameter from a text file. That way, the instance file is a text file only containing a number.
+
+In order to use {\sc ParamILS} to tune {\it Adaptive Search}, the last must comply with specific input/output rules. One solution could be modified the code of the actual {\it Adaptive Search} implementation, but we preferred to build a wrapper instead.
+
+\section{Building the wrapper}
+
+The algorithm executable must follow the input/output criteria presented below: 
+
+\textbf{\large Called as:} 
+
+\begin{verbatim}
+$ <algo_exectuable> <instance_name> <instance-specific_information> 
+<cutoff_time> <cutoff_length> <seed> <params>
+\end{verbatim}
+
+\begin{itemize}
+	\item \texttt{$<$algo\_exectuable$>$} Solver 
+	\item \texttt{$<$instance\_name$>$} In our case, a text file containing only the problem size
+	\item \texttt{$<$instance-specific\_information$>$} We don't use it 
+	\item \texttt{$<$cutoff\_time$>$} Cut off time for each run of the solver (see above)
+	\item \texttt{$<$cutoff\_length$>$} We don't use it
+	\item \texttt{$<$seed$>$} Random seed
+	\item \texttt{$<$params$>$} Parameters and its values
+\end{itemize}
+
+\underline{Exmaple:}
+
+\begin{verbatim}
+$ ./QtWrapper _320.txt "" 50.0 214483647 524453158 -p 5 -l 1 -f 1 -P 50 -F 0
+\end{verbatim}
+
+\textbf{\large Outputs:} 
+
+\begin{verbatim}
+Result for ParamILS: <solved>, <runtime>, <runlength>, <best_sol>, <seed>
+\end{verbatim}
+
+\begin{itemize}
+	\item {\bf $<$solved$>$} \texttt{SAT} if the algorithm terminates successfully. \texttt{TIMESOUT} if the algorithm times out.
+	\item {\bf $<$runtime$>$} Runtime
+	\item {\bf $<$runlength$>$} -1 (as Frank Hutter recommended)
+	\item {\bf $<$best\_sol$>$} -1 (as Frank Hutter recommended)
+	\item {\bf $<$cutoff\_length$>$} We don't use it
+	\item {\bf $<$seed$>$} Used random seed
+\end{itemize}
+
+\underline{Exmaple:}
+
+\begin{verbatim}
+$ SAT, 2.03435, -1, -1, 524453158
+\end{verbatim}
+
+To build the wrapper we have just followed a simple algorithm: launch two process "in parallel". In the parent process we translate the input of the wrapper to the input of {\it Adaptive Search}. The solver is executed, and the runtime is measured. After that we post the output properly. In the child process a {\it sleep} command is executed for \texttt{$<$runtime$>$} seconds and after that, if the parent process has not finished yet, it is killed, posting a times out message. See the {\bf Algorithm} \ref{wrapper} for more details.
+
+%\incmargin{1.4em}
+\linesnumbered
+\begin{algorithm}[H]
+	\caption{Costas Wrapper}
+	\label{wrapper}
+	\dontprintsemicolon
+	\SetLine
+	\SetKwData{paramConfig}{$\theta$}
+	\SetKwData{seed}{s}
+	\SetKwData{Inst}{$Pth_{\pi}$}
+	\SetKwData{cotime}{$k$}
+	\SetKwData{pilsOut}{$PiLS_{out}$}
+	\SetKwData{tstart}{$t_0$}
+	\SetKwData{tend}{$t_e$}
+	\SetKwData{timet}{$t$}
+	\SetKwData{strCal}{strCall}
+	\SetKwFunction{fork}{fork}
+	\SetKwFunction{TIC}{clock\_TIC}
+	\SetKwFunction{TOC}{clock\_TOC}
+	\SetKwFunction{buildStr}{build\_str}
+	\SetKwFunction{call}{systemCall}
+	\SetKwFunction{kill}{killProcess}
+	\SetKwFunction{output}{paramilsOutput}
+	\SetKwFunction{sleep}{sleep}
+	\SetKwInOut{Input}{input}
+	\SetKwInOut{Output}{output}
+	
+	\Input{\Inst : problem instance path, \cotime : cut off time, \seed : random seed, \paramConfig : parameters configuration}
+	\Output{\pilsOut : Output in a {\sc ParamILS} way}
+	\BlankLine
+	
+	\fork{} \tcc{Divide the execution in two processes}
+	\eIf{$<$in child process$>$}{
+		\tstart $\leftarrow$ \TIC{}\;
+		\strCal $\leftarrow$ \buildStr{\texttt{" ./AS\_Wrapper \%1 -s \%2 \%3"}, \Inst, \seed, \paramConfig}\;
+		\call{\strCal}\;
+		\tend $\leftarrow$ \TOC{}\;
+		\kill{$<$parent process$>$} \label{paso7}\;
+		\timet $\leftarrow$ \tend - \tstart\;
+		{\bf return} \output{SAT, \timet, \seed}\;
+	}{
+	\sleep{\cotime}\;
+	\kill{$<$child process$>$}\;
+	{\bf return} \output{TIMESOUT, \cotime, \seed}\;
+}
+\end{algorithm}
+
+\section{Using the wrapper}
+
+\subsection{Factory call}
+
+The first thing we have to do is to implement the class {\sc ICallFactory}. Here, the string-binary-name for the command call is statically obtained.
+
+We present an example, the class {\sc All\_IntervalCallFactory}
+
+\begin{Verbatim}[fontsize=\normalsize]
+\textcolor{verde}{\bf// all_interval_call_factory.h}
+\textcolor{blue}{\bf class} All_IntervalCallFactory: \textcolor{blue}{\bf public} ICallFactory
+\{
+   \textcolor{blue}{\bf public}:
+      std::string BuildCall();
+      std::string BuildDefaultCall();
+\};
+\end{Verbatim}
+
+\begin{Verbatim}[fontsize=\normalsize]
+\textcolor{verde}{\bf// all_interval_call_factory.cpp}
+\textcolor{dred}{\bf #define} ALGO_EXECUTABLE "./all-interval"
+\textcolor{dred}{\bf #define} DEFAULT_CALL "./all-interval _100.txt"
+
+std::string All_IntervalCallFactory::BuildCall()
+\{
+   \textcolor{blue}{\bf return} ALGO_EXECUTABLE;
+\}
+std::string All_IntervalCallFactory::BuildDefaultCall()
+\{
+   \textcolor{blue}{\bf return} DEFAULT_CALL;
+\}
+\end{Verbatim}
+
+All we have to do is to define our new macro {\bf ALGO\_EXECUTABLE} ({\bf DEFAULT\_CALL} is not being used)
+
+\subsection{Main method}
+
+Let's suppose now that we want to run an algorithm called {\it mySolver} that receives a file as a parameter, called {\it my\_instance\_size.txt} (this is mandatory).
+
+So, we have to create (as we've explained before) the class {\sc My\_SolverCallFactory} and to define the macro as follows:
+
+\begin{Verbatim}[fontsize=\normalsize]
+\textcolor{dred}{\bf #define} ALGO_EXECUTABLE "./mySolver"
+\end{Verbatim}
+
+Now, the main method would be exactly like this:
+
+\begin{Verbatim}[fontsize=\normalsize]
+\textcolor{blue}{\bf int} main(\textcolor{blue}{\bf int} argc, \textcolor{blue}{\bf char}* argv[])
+\{
+   shared_ptr<ICallFactory> problem = 
+      make_shared<My_SolverCallFactory>();
+   shared_ptr<TuningData> td = 
+      (make_shared<TuningData>(argc, argv, problem));
+
+   shared_ptr<ADWrapper> w (make_shared<ADWrapper>());
+   string output = w->tune(td);
+
+   cout << output << endl;
+   \textcolor{blue}{\bf return} 0;
+\}
+\end{Verbatim}
+
+\section{Results}
+
+\subsection{ Tuning {\it All-intervals}}
+
+\underline{Study cases:}
+\begin{enumerate}
+	\item The {\it training instances set} is composed by instances of {\it All--Intervals} problems of order $N$ with $$N \in \left\{100, 110, 120, 130, 140, 150, 160, 170, 180\right\}$$
+	\item The {\it test instances set} is composed by instances of {\it All--Intervals} problems of order $N$ with $$N \in \left\{190, 200, 210, 220, 230, 240, 250, 260, 265\right\}$$
+	\item The cutoff for each run was 50.0 seconds
+	\item The test quality is based on 100 runs
+\end{enumerate}
+
+\subsubsection{ Experiment 1}
+
+{\bf Parameters domains}:
+
+\begin{itemize}[itemsep=0.2mm]
+	\item {\bf P}\texttt{ \{41, 46, 51, 56, 60, 66, 71, 76, 80\}}
+	\item {\bf F, f, l}\texttt{ \{0, 1, 2, 3\}}
+	\item {\bf p}\texttt{ \{5, 10, 15, 20, 25, 30, 35\}}
+\end{itemize}
+
+The results are presented in Table \ref{table:allint5yh}.
+
+%\FloatBarrier
+\begin{table}[H] 
+	\caption{Results with \texttt{tunerTimeout} = 20000 seconds}
+	\centering 
+	\renewcommand{\arraystretch}{1.2}
+	\tablePILSresults{
+		0 & 66 & 1 & 1 & 25 & 0 & 80 & 2 & 1 & 35 & 0.79666 & 1780 & 8.274 \\
+		2 & 56 & 2 & 2 & 20 & 1 & 80 & 1 & 1 & 10 & 0.795 & 1637 & 5.508 \\
+		0 & 41 & 0 & 0 & 5 & 1 & 80 & 3 & 0 & 15 & 0.789 & 1547 & 5.8478 \\
+		3 & 80 & 3 & 3 & 35 & 1 & 80 & 2 & 0 & 10 & 0.880686 & 1258 & 6.15398\\
+	}
+	\label{table:allint5yh}
+\end{table}
+
+\subsubsection{ Experiment 2}
+
+{\bf Parameters domains}:
+
+\begin{itemize}[itemsep=0.2mm]
+	\item {\bf P}\texttt{ \{41, 46, 51, 56, 60, 66, 71, 76, 80\}}
+	\item {\bf F, f, l}\texttt{ \{0, 1, 2, 3\}}
+	\item {\bf p}\texttt{ \{5, 10, 15, 20, 25, 30, 35\}}
+\end{itemize}
+
+The results are presented in Table \ref{table:allint1h}.
+
+%\FloatBarrier
+\begin{table}[H] 
+	\caption{Results with \texttt{tunerTimeout} = 3600 seconds}
+	\centering 
+	\renewcommand{\arraystretch}{1.2}
+	\tablePILSresults{
+		0 & 66 & 1 & 1 & 25 & 0 & 80 & 0 & 1 & 25 & 0.815 & 384 & 5.8191 \\
+		0 & 66 & 1 & 1 & 25 & 1 & 80 & 1 & 1 & 35 & 0.737 & 452 & 6.267 \\
+		0 & 66 & 1 & 1 & 25 & 1 & 56 & 0 & 1 & 35 & 1.03 & 371 & 9.056 \\
+		0 & 66 & 1 & 1 & 25 & 0 & 76 & 0 & 1 & 20 & 0.814 & 385 & 4.915 \\
+		0 & 66 & 1 & 1 & 25 & 0 & 80 & 3 & 1 & 20 & 0.76 & 469 & 5.417 \\ 
+		\hline
+		2 & 56 & 2 & 2 & 20 & 0 & 41 & 0 & 1 & 10 & 0.919 & 239 & 18.364 \\
+		2 & 56 & 2 & 2 & 20 & 0 & 56 & 1 & 1 & 20 & 0.819 & 407 & 5.409 \\
+		2 & 56 & 2 & 2 & 20 & 1 & 80 & 1 & 1 & 35 & 0.772 & 457 & 5.43 \\
+		2 & 56 & 2 & 2 & 20 & 1 & 80 & 0 & 1 & 10 & 0.858 & 504 & 5.566 \\
+		2 & 56 & 2 & 2 & 20 & 0 & 80 & 1 & 1 & 10 & 0.7845 & 562 & 18.944 \\
+		\hline
+		0 & 41 & 0 & 0 & 5 & 0 & 41 & 1 & 0 & 10 & 0.9749 & 367 & 5.97813 \\
+		0 & 41 & 0 & 0 & 5 & 0 & 41 & 1 & 0 & 10 & 0.885 & 450 & 5.706 \\
+		0 & 41 & 0 & 0 & 5 & 0 & 41 & 1 & 0 & 10 & 0.906 & 335 & 18.707 \\
+		0 & 41 & 0 & 0 & 5 & 0 & 41 & 1 & 0 & 10 & 0.995 & 335 & 19.558 \\
+		0 & 41 & 0 & 0 & 5 & 0 & 41 & 0 & 0 & 5 & 0.855 & 404 & 5.686 \\
+		\hline
+		3 & 80 & 3 & 3 & 35 & 0 & 66 & 3 & 1 & 25 & 0.9118 & 230 & 26.585 \\
+		3 & 80 & 3 & 3 & 35 & 0 & 80 & 1 & 1 & 10 & 0.732 & 310 & 7.875 \\
+		3 & 80 & 3 & 3 & 35 & 0 & 80 & 0 & 1 & 20 & 0.816 & 303 & 7.2896 \\
+		3 & 80 & 3 & 3 & 35 & 1 & 80 & 3 & 1 & 35 & 0.821 & 327 & 6.812 \\
+		3 & 80 & 3 & 3 & 35 & 0 & 80 & 0 & 1 & 30 & 0.9203 & 443 & 5.401 \\
+	} 
+	\label{table:allint1h}
+\end{table}
+
+\subsubsection{ Experiment 3}
+
+{\bf Parameters domains}:
+
+\begin{itemize}[itemsep=0.2mm]
+	\item {\bf P}\texttt{ \{10, 20, 30, 40, 50, 60, 70, 80, 90\}}
+	\item {\bf F, f, l}\texttt{ \{0, 1, 2, 3, 4, 5, 6, 7, 8\}}
+	\item {\bf p}\texttt{ \{10, 20, 30, 40, 50, 60, 70\}}
+\end{itemize}
+
+The results are presented in Table \ref{table:allint5h}.
+
+%\FloatBarrier
+\begin{table}[H] 
+	\caption{Results with \texttt{tunerTimeout} = 18000 seconds}
+	\centering 
+	\renewcommand{\arraystretch}{1.2}
+	\tablePILSresults{
+		0 & 10 & 0 & 0 & 10 & 0 & 40 & 7 & 0 & 50 & 0.883188 & 936 & 6.3191 \\
+		0 & 10 & 0 & 0 & 10 & 0 & 80 & 2 & 1 & 40 & 0.774659 & 1584 & 5.45674 \\ 
+		0 & 10 & 0 & 0 & 10 & 0 & 40 & 2 & 0 & 10 & 0.96885 & 1104 & 6.82643 \\ 
+		\hline
+		4 & 60 & 4 & 4 & 40 & 0 & 60 & 8 & 1 & 40 & 0.90358 & 1566 & 5.48127 \\
+		4 & 50 & 4 & 4 & 40 & 0 & 80 & 5 & 1 & 20 & 0.78536 & 1662 & 11.5649 \\
+		3 & 50 & 4 & 2 & 30 & 0 & 90 & 6 & 1 & 70 & 0.79440 & 1395 & 5.08108 \\
+		\hline
+		0 & 90 & 0 & 0 & 10 & 1 & 90 & 6 & 1 & 10 & 0.859569 & 1379 & 5.4286 \\ 
+		0 & 90 & 0 & 0 & 10 & 1 & 90 & 6 & 1 & 30 & 0.80738 & 1117 & 5.47126 \\
+		8 & 90 & 8 & 8 & 60 & 0 & 80 & 5 & 1 & 10 & 0.834934 & 1384 & 5.5377 \\
+		\hline
+		5 & 30 & 2 & 3 & 60 & 0 & 90 & 1 & 0 & 20 & 0.862013 & 1707 & 5.21837 \\
+		3 & 20 & 2 & 4 & 60 & 0 & 80 & 6 & 1 & 10 & 0.805604 & 1630 & 5.4467 \\ 
+		6 & 70 & 1 & 3 & 50 & 0 & 80 & 5 & 1 & 10 & 0.792600 & 1344 & 5.46558 \\  
+		6 & 40 & 1 & 3 & 30 & 1 & 80 & 7 & 0 & 20 & 0.822703 & 1977 & 5.41185 \\
+	} 
+	\label{table:allint5h}
+\end{table}
+
+\subsubsection{ Testing parameters}
+
+To the next experiment, only the results obtained in the Tables \ref{table:allint5yh} and \ref{table:allint5h} were took into account, since they were obtained by using longer cut-off times. As it can be observed in those tables, {\it Adaptive Search} seems to show a good behavior if the parameters {\bf F}, {\bf P} and {\bf l} are in the following sets: \texttt{\bf F} $\in$ \texttt{\{ 0, 1\}}, \texttt{\bf P} $\in$ \texttt{\{ 80, 90\}} and \texttt{\bf l} $\in$ \texttt{\{ 0, 1\}}.
+
+
+In that sense, an specific configuration was extracted from the results above, and 60 runs of {\it Adaptive Search} were performed solving {\it All--Intervals} ($N = 600$) benchmark:
+\begin{itemize}
+	\item[-] 30 using the default parameter configuration (\texttt{-F 0 -P 66 -f 1 -l 1 -p 25})
+	\item[-] 30 with an optimal parameter configuration extracted from the Tables \ref{table:allint5yh}, \ref{table:allint5h} (\texttt{-F 0 -P 80 -f 6 -l 1 -p 10}) 
+\end{itemize}
+
+Tables \ref{table:testaibad} shows the results by using the default parameter configuration, and Table \ref{table:testaigood} shows the results by using the parameter configuration found by {\it ParamILS}, and it is clear that the default configuration shows better results than {\it ParamILS}'s one.
+
+\begin{table}[H]
+\caption{Default configuration runtimes (secs)}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|ccccc|}
+	\hline
+	37.210 & 411.300 & 112.510 & 171.000 & 73.770 \\ 
+	327.880 & 214.910 & 124.910 & 482.740 & 530.440 \\  
+	\hline 
+	212.660 & 99.370 & 287.400 & 533.540 & \textcolor{naranja}{\bf 18.410} \\ 
+	197.290 & 1016.950 & 110.230 & 566.480 & \textcolor{intenso}{\bf 1362.010} \\  
+	\hline 
+	94.860 & 819.700 & 434.460 & 620.600 & 95.920 \\ 
+	80.580 & 333.370 & 121.590 & 489.700 & 248.370 \\  
+	\hline 
+	\multicolumn{5}{|c|}{\bf mean: 341.005333}\\
+	\hline
+\end{tabular}
+\label{table:testaibad}
+\end{table}
+	
+\begin{table}[H]
+\caption{ParamILS configuration runtimes (secs)}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|ccccc|}
+	\hline
+	154.460 & 264.530 & 169.840 & 26.990 & 108.790 \\ 
+	550.210 & 104.900 & 31.100 & \textcolor{naranja}{\bf 9.870} & 1242.900 \\  
+	\hline 
+	678.760 & 475.570 & 201.200 & 622.410 & 297.960 \\ 
+	526.930 & 375.620 & 293.380 & 598.850 & 350.270 \\  
+	\hline 
+	540.290 & 252.940 & 673.630 & 423.030 & 589.210 \\ 
+	32.080 & 254.640 & \textcolor{intenso}{\bf 2034.020} & 571.100 & 207.090 \\  
+	\hline 
+	\multicolumn{5}{|c|}{\bf mean: 422.085667}\\
+	\hline
+\end{tabular}
+\label{table:testaigood}
+\end{table} 
+
+\subsection{ Tuning \textbf{\it Costas Array}}
+
+\underline{Study cases:}
+\begin{enumerate}
+	\item The {\it training instances set} is composed by instances of {\it Costas Array} problems of order $N$ with $9 \leq N \leq 15$
+	\item The {\it test instances set} is composed by instances of {\it Costas Array} problems of order $N$ with $14 \leq N \leq 19$
+	\item The cutoff for each run was 60.0 seconds
+	\item The test quality is based on 100 runs
+\end{enumerate}
+
+\subsubsection{ Tuning experiments}
+
+{\bf Parameters domains}:
+
+\begin{itemize}[itemsep=0.2mm]
+	\item {\bf P}\texttt{ \{10, 20, 30, 40, 50, 60, 70, 80, 90\}}
+	\item {\bf F, f, l}\texttt{ \{0, 1, 2, 3, 4, 5, 6, 7, 8\}}
+	\item {\bf p}\texttt{ \{5, 10, 20, 30, 40, 50, 60, 70\}}
+\end{itemize}
+
+The results are presented in Table \ref{table:ca1}.
+
+%\FloatBarrier
+\begin{table} 
+\caption{Results with \texttt{tunerTimeout} = 1800 seconds}
+\centering 
+\renewcommand{\arraystretch}{1.2}
+\tablePILSresults{
+	0 & 10 & 0 & 0 & 5 & 2 & 90 & 2 & 2 & 5 & 0.0493699 & 957 & 5.8461 \\
+	0 & 10 & 0 & 0 & 5 & 0 & 90 & 5 & 2 & 5 & 0.0509388 & 1783 & 6.52742 \\ 
+	0 & 10 & 0 & 0 & 5 & 0 & 90 & 5 & 2 & 5 & 0.049901 & 1759 & 5.21828 \\ 
+	\hline
+	3 & 40 & 4 & 4 & 30 & 3 & 90 & 5 & 2 & 30 & 0.053974 & 856 & 6.3539 \\ 
+	4 & 50 & 3 & 5 & 20 & 4 & 90 & 5 & 2 & 20 & 0.0500355 & 2000 & 5.4047 \\ 
+	4 & 60 & 5 & 3 & 50 & 4 & 60 & 5 & 3 & 50 & 0.0520575 & 2000 & 6.09106 \\
+	\hline
+	8 & 90 & 8 & 8 & 70 & 8 & 80 & 4 & 2 & 70 & 0.052685 & 550 & 3.85682 \\
+	8 & 90 & 8 & 8 & 70 & 8 & 80 & 4 & 2 & 70 & 0.054104 & 536 & 4.17855 \\ 
+	8 & 90 & 8 & 8 & 70 & 8 & 80 & 4 & 2 & 70 & 0.0497819 & 1284 & 3.90945 \\ 
+	\hline 
+	3 & 10 & 1 & 6 & 60 & 3 & 90 & 5 & 2 & 60 & 0.054934 & 2000 & 6.81675 \\ 
+	5 & 70 & 6 & 1 & 10 & 5 & 90 & 4 & 2 & 10 & 0.0499895 & 2000 & 4.07365 \\ 
+	1 & 30 & 5 & 7 & 5 & 1 & 90 & 4 & 2 & 5 & 0.0525747 & 1237 & 2.70091 \\ 
+	7 & 80 & 2 & 0 & 70 & 7 & 90 & 5 & 2 & 70 & 0.0502264 & 212 & 5.2637 \\ 
+} 
+\label{table:ca1}
+\end{table}
+
+\subsubsection{ Testing parameters}
+
+The Table \ref{table:ca1} shows, how {\it Adaptive Search} seems to be not sensitive to parameters {\bf F} and {\bf p}, i.e. they don't change during the tuning process. On the other hand, the tuner seems to find some optimum values for the other parameters: \texttt{\bf P} $\in$ \texttt{\{ 80, 90\}}, \texttt{\bf f} $\in$ \texttt{\{ 4, 5\}} and \texttt{\bf l} $=$ \texttt{2}.
+
+In that case also, an specific configuration was extracted from the results showed in Table \ref{table:ca1}, and 60 runs of {\it Adaptive Search} were performed solving {\it Costas Array} ($N = 20$) benchmark: 
+\begin{itemize}
+	\item[-] 30 using the default parameter configuration (\texttt{-F 0 -P 50 -f 1 -l 0 -p 5})
+	\item[-] 30 with an optimal parameter configuration extracted from the Table \ref{table:ca1} (\texttt{-F 3 -P 90 -f 5 -l 2 -p 30}) 
+\end{itemize}
+
+Table \ref{table:testcabad} shows the results by using the default parameter configuration, and Table \ref{table:testcagood} shows the results by using the parameter configuration found by {\it ParamILS}. One more time, "in the mean", the default configuration wins.
+
+\begin{table}[H]
+\caption{Default configuration runtimes (secs)}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|ccccc|}
+	\hline
+	452.980 & 91.420 & 31.510 & \textcolor{intenso}{\bf 827.860} & 96.670 \\ 
+	635.030 & 295.830 & 272.360 & 151.040 & 170.660 \\  
+	\hline 
+	183.550 & 161.340 & 91.240 & 426.470 & 62.020 \\ 
+	138.090 & 236.030 & \textcolor{naranja}{\bf 2.850} & 187.240 & 21.510 \\  
+	\hline 
+	165.370 & 90.440 & 195.580 & 15.390 & 229.720 \\ 
+	170.840 & 174.210 & 30.520 & 6.570 & 115.880 \\  
+	\hline
+	\multicolumn{5}{|c|}{\bf mean: 191.007}\\
+	\hline
+\end{tabular}
+\label{table:testcabad}
+\end{table}
+
+\begin{table}[H]
+\caption{ParamILS configuration runtimes (secs)}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|ccccc|}
+	\hline
+	546.260 & 263.230 & 17.200 & 29.220 & 495.940 \\ 
+	237.340 & 187.760 & \textcolor{naranja}{\bf 7.810} & 43.120 & 94.370 \\  
+	\hline 
+	59.930 & 128.690 & 247.810 & 265.010 & 231.260 \\ 
+	209.640 & 465.340 & 21.840 & 8.740 & \textcolor{intenso}{\bf 1264.610} \\  
+	\hline 
+	57.700 & 122.890 & 450.610 & 229.580 & 174.540 \\ 
+	414.080 & 402.250 & 91.150 & 677.190 & 58.640 \\  
+	\hline 
+	\multicolumn{5}{|c|}{\bf mean: 250.125}\\
+	\hline
+\end{tabular}
+\label{table:testcagood}
+\end{table}    
+
+\section{Tuning comparison}
+
+\subsection{Experiment 1: Around Default parameters}
+
+{\bf Parameters domains}:
+
+\begin{itemize}[itemsep=0.2mm]
+	\item {\bf P}\texttt{ \{43, 45, 47, 50, 53, 55, 57\}}
+	\item {\bf F, f, l}\texttt{ \{0, 1, 2\}}
+	\item {\bf p}\texttt{ \{5, 7, 10\}}
+\end{itemize}
+
+The results are presented in Table \ref{table:allint5hdef}.
+
+%\FloatBarrier
+\begin{table}[H] 
+\caption{Results with \texttt{tunerTimeout} = 18000 seconds}
+\centering 
+\renewcommand{\arraystretch}{1.2}
+\tablePILSresults{
+2 & 43 & 0 & 0 & 7 & 0 & 45 & 1 & 0 & 5 & 0.0438025 & 952 & 3.13061 \\ 
+1 & 55 & 2 & 2 & 10 & 1 & 53 & 2 & 0 & 5 & 0.0434366 & 1120 & 6.8108005 \\ 
+1 & 55 & 2 & 2 & 10 & 1 & 53 & 2 & 0 & 5 & 0.0435660 & 2000 & 4.6961601 \\ 
+} 
+\label{table:allint5hdef}
+\end{table}
+
+\subsection{ Experiment 2: Around ParamILS parameters}
+
+{\bf Parameters domains}:
+
+\begin{itemize}[itemsep=0.2mm]
+	\item {\bf P}\texttt{ \{75, 77, 80, 83, 85, 87, 90, 93, 95\}}
+	\item {\bf f}\texttt{ \{4, 5, 6\}}
+	\item {\bf F}\texttt{ \{2, 3, 4\}}
+	\item {\bf l}\texttt{ \{1, 2, 3\}}
+	\item {\bf p}\texttt{ \{20, 25, 30, 35, 40\}}
+\end{itemize}
+
+The results are presented in Table \ref{table:allint5hparamils}.
+
+%\FloatBarrier
+\begin{table}[H] 
+\caption{Results with \texttt{tunerTimeout} = 18000 seconds}
+\centering 
+\renewcommand{\arraystretch}{1.2}
+\tablePILSresults{ 
+2 & 85 & 6 & 1 & 35 & 2 & 85 & 6 & 1 & 35 & 0.0447855 & 2000 & 5.1182902 \\ 
+4 & 75 & 4 & 3 & 25 & 4 & 75 & 4 & 3 & 25 & 0.0458100 & 2000 & 3.4968102 \\ 
+3 & 95 & 5 & 2 & 40 & 3 & 95 & 5 & 2 & 40 & 0.0470930 & 2000 & 4.6591102 \\ 
+} 
+\label{table:allint5hparamils}
+\end{table}
+
+\section{Conclusion}
+
+The conclusion of this study is that the tunning process by hand in this case was more effective than using {\it ParamILS}. The results show that the found parameters are less effectives than the default parameters in both cases.

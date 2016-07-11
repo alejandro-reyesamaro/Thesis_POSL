@@ -1,0 +1,24 @@
+\chapter{Prior works leading to \af}
+\label{chap:prior}
+\textit{In this chapter are presented Prior works leading to \af. In Section~\ref{sec:relaxation} we explain how to tackle \csps{} by modeling it through a continuous optimization problem, as a first attempt aiming for the right direction in order to find the proper approach. In Section~\ref{sec:split} we present a brief work where we applied the the {\it problem subdivision} approach to solve the {\it k-medoids problem} in parallel. Finally we present in Section~\ref{sec:paramils} a study applying the {\sc ParamILS} tool in order to find the optimum parameter configuration to {\it Adaptive Search} solver.}
+\vspace{2ex}\vfill
+\minitoc
+\newpage
+
+\section{Relaxation model for discrete \csps}
+\label{sec:relaxation}
+
+Aiming for the right direction in order to find the proper approach, our first attempt to tackle the problem of reducing the search space of a \csp, we model it through a continuous optimization problem, and then, applying efficient methods to solve it. This way we do not reach an optimal solution, but an approximation of it. The new variables domain would be the neighborhood of the found approximation.
+
+\input{paramils}
+
+\section{Domain Split}
+\label{sec:split}
+
+A way to tackle huge combinatorial problems in parallel is to split the search space. In this section, the {\it problem subdivision} approach was adopted to divide the domain of a given problem, in this particular case, to solve the {\it k-medoids problem} in parallel. \footnote{This work falls within the framework of the \textit{Ulysses} project between France and Ireland}
+
+\section{Tunning methods for local search algorithms}
+\label{sec:paramils}
+
+Another performed study was applying the {\sc ParamILS} tool in order to find the optimum parameter configuration to {\it Adaptive Search} solver. {\sc ParamsILS} (version 2.3) is a tool for parameter optimization for parametrized algorithms \cite{Hutter2009}. 
+It is an open source program (project) in {\it Ruby}, and the public source include some examples and a detailed and complete User Guide with a compact explanation about how to use it with a specific solver \cite{Hutter2008}.
