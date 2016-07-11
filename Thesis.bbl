@@ -707,6 +707,41 @@ Jeff Clune, Sherri Goings, Erik~D. Goodman, and William Punch.
 \newblock In {\em GECOO'05: Proceedings of the 2005 Workshop on Genetic an
   Evolutionary Computation}, pages 235--241, 2005.
 
+\bibitem{Pardalos2006}
+Panos~M Pardalos, Oleg~A Prokopyev, and Stanislav Busygin.
+\newblock {Continuous Approaches for Solving Discrete Optimization Problems}.
+\newblock In {\em Handbook on Modelling for Discrete Optimization}, pages
+  39--60. Springer US, 2006.
+
+\bibitem{Zhu1994}
+Ciyou Zhu, Richard~H Byrd, Peihuang Lu, and Jorge Nocedal.
+\newblock {L-BFGS-B. Fortran subroutines for large-scale bound constrained
+  optimization}.
+\newblock {\em ACM Transactions on Mathematical Software (TOMS)},
+  23(4):550--560, 1997.
+
+\bibitem{Byrd1994}
+Richard~H Byrd, Peihuang Lu, Jorge Nocedal, and Ciyou Zhu.
+\newblock {A limited memory algorithm for bound constrained optimization}.
+\newblock {\em Technical Report NAM-08}, 1994.
+
+\bibitem{Liu1989}
+Dong~C. Liu and Jorge Nocedal.
+\newblock {On the limited memory BFGS method for large scale optimization}.
+\newblock {\em Mathematical Programming 45}, pages 503--528, 1989.
+
+\bibitem{Nocedal1996}
+Jorge Nocedal.
+\newblock {Large scale unconstrained optimization}.
+\newblock In {\em The State of the Art in Numerical Analysis}, pages 311--338.
+  Oxford University Press, 1996.
+
+\bibitem{Paradis2005}
+Emmanuel Paradis.
+\newblock {R for Beginners}.
+\newblock Technical report, Institut des Sciences de l'Evolution,
+  Universit{\'{e}} Montpellier II, 2005.
+
 \bibitem{Rickard}
 Scott Rickard.
 \newblock {Open Problems in Costas Arrays}.

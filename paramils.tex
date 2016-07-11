@@ -35,7 +35,7 @@ Parameter & Type & Description \\ [0.5ex]
 
 In this document, we explain in details the implementation and experimentation process.
 
-\section{ParamILS\_2.3}
+\subsection{ParamILS\_2.3}
 
 {\sc ParamILS} is a open source program (project) in {\it Ruby}. It can be downloaded from 
 
@@ -45,7 +45,7 @@ In this document, we explain in details the implementation and experimentation p
 
 The \texttt{zip} file includes some examples that you can run and see how the tool works. It In addition, it brings a complete User Guide with a compact explanation about how to use it with a specific solver. 
 
-\section{Using ParamILS}
+\subsection{Using ParamILS}
 
 To use the tool {\sc ParamILS}, we have installed Ruby 1.8.7 in our computer. In this firs step, we are using a laptop with {\sc ubuntu 14.4} but our idea is to make some tests in {\it Curiosiphi}\footnote{...}.
 
@@ -59,7 +59,7 @@ $ ruby param_ils_2_3_run.rb -numRun 0 -scenariofile
 
 All the information that {\sc ParamILS} needs to tune the solver has to be written in the file \texttt{$<$scenario\_file$>$}. We explain its content in the next section.
 
-\section{Tuning scenario files}
+\subsection{Tuning scenario files}
 
 The {\it tuning scenario file} is a text file with all the information concerning to how to tune the solver with {\sc ParamILS}. It includes where to find the solver binary, the parameter domains, etc. In our case, the {\it tuning scenario file} looks like the following:
 
@@ -115,7 +115,7 @@ So, to use {\sc ParamILS} we modified a little our code: now our solver takes th
 
 In order to use {\sc ParamILS} to tune {\it Adaptive Search}, the last must comply with specific input/output rules. One solution could be modified the code of the actual {\it Adaptive Search} implementation, but we preferred to build a wrapper instead.
 
-\section{Building the wrapper}
+\subsection{Building the wrapper}
 
 The algorithm executable must follow the input/output criteria presented below: 
 
@@ -212,9 +212,9 @@ To build the wrapper we have just followed a simple algorithm: launch two proces
 }
 \end{algorithm}
 
-\section{Using the wrapper}
+\subsection{Using the wrapper}
 
-\subsection{Factory call}
+\subsubsection{Factory call}
 
 The first thing we have to do is to implement the class {\sc ICallFactory}. Here, the string-binary-name for the command call is statically obtained.
 
@@ -247,7 +247,7 @@ std::string All_IntervalCallFactory::BuildDefaultCall()
 
 All we have to do is to define our new macro {\bf ALGO\_EXECUTABLE} ({\bf DEFAULT\_CALL} is not being used)
 
-\subsection{Main method}
+\subsubsection{Main method}
 
 Let's suppose now that we want to run an algorithm called {\it mySolver} that receives a file as a parameter, called {\it my\_instance\_size.txt} (this is mandatory).
 
@@ -275,9 +275,9 @@ Now, the main method would be exactly like this:
 \}
 \end{Verbatim}
 
-\section{Results}
+\subsection{Results}
 
-\subsection{ Tuning {\it All-intervals}}
+\subsubsection{ Tuning {\it All-intervals}}
 
 \underline{Study cases:}
 \begin{enumerate}
@@ -287,7 +287,7 @@ Now, the main method would be exactly like this:
 	\item The test quality is based on 100 runs
 \end{enumerate}
 
-\subsubsection{ Experiment 1}
+\paragraph{ Experiment 1}
 
 {\bf Parameters domains}:
 
@@ -313,7 +313,7 @@ The results are presented in Table \ref{table:allint5yh}.
 	\label{table:allint5yh}
 \end{table}
 
-\subsubsection{ Experiment 2}
+\paragraph{ Experiment 2}
 
 {\bf Parameters domains}:
 
@@ -358,7 +358,7 @@ The results are presented in Table \ref{table:allint1h}.
 	\label{table:allint1h}
 \end{table}
 
-\subsubsection{ Experiment 3}
+\paragraph{ Experiment 3}
 
 {\bf Parameters domains}:
 
@@ -396,7 +396,7 @@ The results are presented in Table \ref{table:allint5h}.
 	\label{table:allint5h}
 \end{table}
 
-\subsubsection{ Testing parameters}
+\paragraph{ Testing parameters}
 
 To the next experiment, only the results obtained in the Tables \ref{table:allint5yh} and \ref{table:allint5h} were took into account, since they were obtained by using longer cut-off times. As it can be observed in those tables, {\it Adaptive Search} seems to show a good behavior if the parameters {\bf F}, {\bf P} and {\bf l} are in the following sets: \texttt{\bf F} $\in$ \texttt{\{ 0, 1\}}, \texttt{\bf P} $\in$ \texttt{\{ 80, 90\}} and \texttt{\bf l} $\in$ \texttt{\{ 0, 1\}}.
 
@@ -451,7 +451,7 @@ Tables \ref{table:testaibad} shows the results by using the default parameter co
 \label{table:testaigood}
 \end{table} 
 
-\subsection{ Tuning \textbf{\it Costas Array}}
+\subsubsection{ Tuning \textbf{\it Costas Array}}
 
 \underline{Study cases:}
 \begin{enumerate}
@@ -461,7 +461,7 @@ Tables \ref{table:testaibad} shows the results by using the default parameter co
 	\item The test quality is based on 100 runs
 \end{enumerate}
 
-\subsubsection{ Tuning experiments}
+\paragraph{ Tuning experiments}
 
 {\bf Parameters domains}:
 
@@ -499,7 +499,7 @@ The results are presented in Table \ref{table:ca1}.
 \label{table:ca1}
 \end{table}
 
-\subsubsection{ Testing parameters}
+\paragraph{ Testing parameters}
 
 The Table \ref{table:ca1} shows, how {\it Adaptive Search} seems to be not sensitive to parameters {\bf F} and {\bf p}, i.e. they don't change during the tuning process. On the other hand, the tuner seems to find some optimum values for the other parameters: \texttt{\bf P} $\in$ \texttt{\{ 80, 90\}}, \texttt{\bf f} $\in$ \texttt{\{ 4, 5\}} and \texttt{\bf l} $=$ \texttt{2}.
 
@@ -553,9 +553,9 @@ Table \ref{table:testcabad} shows the results by using the default parameter con
 \label{table:testcagood}
 \end{table}    
 
-\section{Tuning comparison}
+\subsection{Tuning comparison}
 
-\subsection{Experiment 1: Around Default parameters}
+\subsubsection{Experiment 1: Around Default parameters}
 
 {\bf Parameters domains}:
 
@@ -580,7 +580,7 @@ The results are presented in Table \ref{table:allint5hdef}.
 \label{table:allint5hdef}
 \end{table}
 
-\subsection{ Experiment 2: Around ParamILS parameters}
+\subsubsection{ Experiment 2: Around ParamILS parameters}
 
 {\bf Parameters domains}:
 
@@ -607,6 +607,6 @@ The results are presented in Table \ref{table:allint5hparamils}.
 \label{table:allint5hparamils}
 \end{table}
 
-\section{Conclusion}
+\subsection{Conclusion}
 
 The conclusion of this study is that the tunning process by hand in this case was more effective than using {\it ParamILS}. The results show that the found parameters are less effectives than the default parameters in both cases.

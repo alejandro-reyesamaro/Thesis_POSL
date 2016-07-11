@@ -13,45 +13,45 @@ Warning--empty year in Jinnai
 Warning--empty journal in Zoeteweij
 Warning--there's a number but no volume in Zoeteweij
 Warning--empty year in Zoeteweij
-You've used 118 entries,
+You've used 124 entries,
             1791 wiz_defined-function locations,
-            1196 strings with 23240 characters,
-and the built_in function-call counts, 35186 in all, are:
-= -- 3468
-> -- 1256
-< -- 86
-+ -- 460
-- -- 342
-* -- 2262
-:= -- 5030
-add.period$ -- 398
-call.type$ -- 118
-change.case$ -- 129
+            1233 strings with 24253 characters,
+and the built_in function-call counts, 36779 in all, are:
+= -- 3628
+> -- 1311
+< -- 89
++ -- 481
+- -- 357
+* -- 2349
+:= -- 5264
+add.period$ -- 418
+call.type$ -- 124
+change.case$ -- 136
 chr.to.int$ -- 0
-cite$ -- 128
-duplicate$ -- 1766
-empty$ -- 3414
-format.name$ -- 342
-if$ -- 8286
+cite$ -- 134
+duplicate$ -- 1848
+empty$ -- 3566
+format.name$ -- 357
+if$ -- 8663
 int.to.chr$ -- 0
-int.to.str$ -- 118
-missing$ -- 116
-newline$ -- 593
-num.names$ -- 136
-pop$ -- 427
+int.to.str$ -- 124
+missing$ -- 121
+newline$ -- 623
+num.names$ -- 142
+pop$ -- 447
 preamble$ -- 1
 purify$ -- 0
 quote$ -- 0
-skip$ -- 1012
+skip$ -- 1061
 stack$ -- 0
-substring$ -- 2673
-swap$ -- 657
-text.length$ -- 86
+substring$ -- 2786
+swap$ -- 688
+text.length$ -- 89
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 0
 warning$ -- 10
-while$ -- 388
-width$ -- 121
-write$ -- 1363
+while$ -- 405
+width$ -- 127
+write$ -- 1430
 (There were 10 warnings)

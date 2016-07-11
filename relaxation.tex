@@ -1,0 +1,51 @@
+On a first attempt to tackle the problem of reducing the search space of a CSP, we thought to model it through a continuous problem, and after, trying to apply efficient methods to solve this kind of problems. This way we do not reach an optimal solution, but an approximation of it. The new variables domain would be the neighborhood of the found approximation. In \cite{Pardalos2006} some issues to take into account in order to model combinatorial problems using continuous problems are showed.
+
+To illustrate the fallowed procedure, we will use a widely known problem: \textit{n-queens problem}.
+
+In the \textit{n-queens problem}, you want to place $n$ queens on an $n \times n$ chessboard (square grid). Each queen occupies one square on a grid and no two queens share the same square. Two queens are attacking each other if one of them can  travel horizontally, vertically, or diagonally and hit the square the other queen is on. The problem is to place the queens such that no two queens are attacking each other.
+
+The Constraint Satisfaction Problem associated to the $n\times n$ N-Queens problem:
+
+\begin{equation}
+\begin{array}{rl}
+\label{CSP}\text{CSP} = &\left\{\mathbb{X}, \mathbb{D(X)}, \mathbb{C}\right\}\\
+\mathbb{X} =& \left(x_1, x_2, \dots, x_n\right)\\
+\mathbb{D(X)} =& \left\{\mathbb{D}(x_i)\right\}, \mathbb{D}(x_i) = \left\{1, 2, \dots, n\right\}, \forall i = 1 \dots n\\
+\mathbb{C} =& \left\{\mathbb{C}_1, \mathbb{C}_2\right\}
+\end{array}
+\end{equation}
+
+In Model \ref{CSP}, the value of $x_i$ represent the position of a queen in the column $i$. This representation ensures that only one queen will be placed in a given column. To ensure that only one queen can be placed in a row, we can write the following constraint:
+
+\begin{align*}
+\mathbb{C}_1 &\equiv x_i \neq x_j\\
+\mathbb{C}_1 &\equiv x_i - x_j > 0 \text{  or  } x_i - x_j < 0\\
+\mathbb{C}_1 &\equiv \left(x_i - x_j\right)^2 > 0\text{, }\forall i < j\\
+\end{align*}
+
+Then, we only have to ensure that two queens can not be connected diagonally:
+
+\begin{align*}
+\mathbb{C}_2 &\equiv \left|x_i - x_j\right| \neq \left|j - i\right|\\
+\mathbb{C}_2 &\equiv \left(x_i - x_j\right)^2 \neq \left(j - i\right)^2\\
+\mathbb{C}_2 &\equiv \left(x_i - x_j \right)^2 - (j - i)^2 > 0 \text{  or  } \left(x_i - x_j\right)^2 - (j - i)^2 < 0\\
+\mathbb{C}_2 &\equiv \left(\left(x_i - x_j \right)^2 - (j - i)^2\right)^2 > 0\text{, }\forall i < j\\
+\end{align*}
+
+We describe below the transformation into a non-linear optimization problem penalized.
+
+\begin{equation}
+\text{NLOP } = \left\{
+\begin{array}{rrl}
+\min & f(X) = & -P_1\cdot\sum\limits_{i < j}{\left(x_i - x_j\right)^2}\\
+ & & - P_2\sum\limits_{i < j}{\left(\left(x_i - x_j \right)^2 - (j - i)^2\right)^2}-\\
+ & & - P_3\sum\limits_{i < j}{\left(\left(x_j - x_i \right)^2 - (j - i)^2\right)^2}\\
+ & X = & (x_i)\text{, } i = 1\dots n \text{ and } i < j\\
+\text{s.t.: } & 1 \leq x_i \leq n & 
+\end{array}
+\right.
+\end{equation}
+
+The global minimum $\zeta$ exists and $f(\zeta) = 0$. The main key here is to choose $P_i\text{, }i=1..3$ big enough. In this way we obtained a non-linear optimization model with box-constraints, and from \cite{Zhu1994, Byrd1994, Liu1989} we have an efficient program to solve this kind of problems (\textit{L-BFGS-B}), even for large instances \cite{Nocedal1996}. This work provide an open source code in C\#, and to use it we had to implement a subroutine (method) called \textbf{fungrad}, telling to the algorithm how to evaluate the objective function and his gradient.
+
+This approach did not show good results. One possible reason is that, as we can see, a quadratic model at first became in a more complex model with 4-exponent. It is fear to remark also that this problem can have several local optimums ($\bigtriangledown F(X^*) = 0$) different than the global optimum, and this algorithm returns them as solutions. In a continuous point of view two different variables have different values even when they are too close, and this can be the other reason. The previous model can be improved in order to obtain better results. Also a good idea is to choose others benchmark problems as case of study, but we decide to not keep working on that because the investigation in this field will take us further apart from the thesis main goal.
