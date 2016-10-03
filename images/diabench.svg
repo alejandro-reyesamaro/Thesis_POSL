@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="55cm" height="23cm" viewBox="476 -146 1082 460" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="619" y="-75" width="379.6" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="619" y="-75" width="379.6" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:italic;font-weight:700" x="808.8" y="-56">Benchmark</text>
+    <rect style="fill: #ffffff" x="619" y="-47" width="379.6" height="68"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="619" y="-47" width="379.6" height="68"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="-33">#current_configuration: vector&lt;int&gt;</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="-17">#cost_strategy: SolutionCostStrategy</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="-1">#relative_cost_strategy: RelativeCostStrategy</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="15">#show_strategy: ShowStrategy</text>
+    <rect style="fill: #ffffff" x="619" y="21" width="379.6" height="68"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="619" y="21" width="379.6" height="68"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="35">+solutionCost(in solution:Solution): int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="51">+relativeSolutionCost(in solution:Solution): int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="67">+costOnVariable(in variable_index:int): int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="622" y="83">+sickestVariable(): int</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="477" y="157" width="94.7" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="477" y="157" width="94.7" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="524.35" y="176">NQueens</text>
+    <rect style="fill: #ffffff" x="477" y="185" width="94.7" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="477" y="185" width="94.7" height="20"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="480" y="199">-order: int</text>
+    <rect style="fill: #ffffff" x="477" y="205" width="94.7" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="477" y="205" width="94.7" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="808.8,108.241 808.8,130.999 524.35,130.999 524.35,155.993 "/>
+    <polygon style="fill: #ffffff" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="594" y="175" width="164" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="594" y="175" width="164" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="676" y="194">Subsum</text>
+    <rect style="fill: #ffffff" x="594" y="203" width="164" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="594" y="203" width="164" height="52"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="597" y="217">-values: vector&lt;int&gt;</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="597" y="233">-subsum: int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="597" y="249">-n: int</text>
+    <rect style="fill: #ffffff" x="594" y="255" width="164" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="594" y="255" width="164" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="808.8,108.241 808.8,140 676,140 676,173.995 "/>
+    <polygon style="fill: #ffffff" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1009" y="138" width="126.7" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1009" y="138" width="126.7" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="1072.35" y="157">GolombRuler</text>
+    <rect style="fill: #ffffff" x="1009" y="166" width="126.7" height="36"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1009" y="166" width="126.7" height="36"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1012" y="180">-order: int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="1012" y="196">-length: int</text>
+    <rect style="fill: #ffffff" x="1009" y="202" width="126.7" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1009" y="202" width="126.7" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="808.8,108.241 808.8,121.498 1072.35,121.498 1072.35,136.991 "/>
+    <polygon style="fill: #ffffff" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="925" y="225" width="110.1" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="925" y="225" width="110.1" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="980.05" y="244">Golfers</text>
+    <rect style="fill: #ffffff" x="925" y="253" width="110.1" height="52"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="925" y="253" width="110.1" height="52"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="928" y="267">-groups: int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="928" y="283">-players: int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="928" y="299">-weeks: int</text>
+    <rect style="fill: #ffffff" x="925" y="305" width="110.1" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="925" y="305" width="110.1" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="808.8,108.241 808.8,165 980.05,165 980.05,223.995 "/>
+    <polygon style="fill: #ffffff" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="782" y="203" width="119.15" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="782" y="203" width="119.15" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:700" x="841.575" y="222">CostasArray</text>
+    <rect style="fill: #ffffff" x="782" y="231" width="119.15" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="782" y="231" width="119.15" height="20"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:normal;font-weight:normal" x="785" y="245">+order: int</text>
+    <rect style="fill: #ffffff" x="782" y="251" width="119.15" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="782" y="251" width="119.15" height="8"/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="808.8,108.241 808.8,153.999 841.575,153.999 841.575,201.993 "/>
+    <polygon style="fill: #ffffff" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="816.8,108.241 808.8,92.2411 800.8,108.241 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1178" y="-73" width="318" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1178" y="-73" width="318" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:italic;font-weight:700" x="1337" y="-54">SolutionCostStrategy</text>
+    <rect style="fill: #ffffff" x="1178" y="-45" width="318" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1178" y="-45" width="318" height="8"/>
+    <rect style="fill: #ffffff" x="1178" y="-37" width="318" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1178" y="-37" width="318" height="20"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1181" y="-23">+solutionCost(in solution:Solution): int</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="999.606,7 1084.3,7 1084.3,-45 1170.29,-45 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1157.64,-40 1173.64,-45 1157.64,-50 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1177" y="-2" width="379.6" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1177" y="-2" width="379.6" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:italic;font-weight:700" x="1366.8" y="17">RelativeCostStrategy</text>
+    <rect style="fill: #ffffff" x="1177" y="26" width="379.6" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1177" y="26" width="379.6" height="8"/>
+    <rect style="fill: #ffffff" x="1177" y="34" width="379.6" height="100"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1177" y="34" width="379.6" height="100"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1180" y="48">+initializeCostData(in solution:Solution)</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1180" y="64">+updateConfiguration(in solution:Solution)</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1180" y="80">+relativeSolutionCost(in solution:Solution): int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1180" y="96">+currentCost(): int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1180" y="112">+costOnVariable(in variable_index:int): int</text>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1180" y="128">+sickestVariable(): int</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="999.606,7 1083.8,7 1083.8,66 1169.29,66 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1156.64,71 1172.64,66 1156.64,61 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="1179" y="-144" width="341.1" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1179" y="-144" width="341.1" height="28"/>
+    <text font-size="16" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:italic;font-weight:700" x="1349.55" y="-125">ShowStrategy</text>
+    <rect style="fill: #ffffff" x="1179" y="-116" width="341.1" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1179" y="-116" width="341.1" height="8"/>
+    <rect style="fill: #ffffff" x="1179" y="-108" width="341.1" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1179" y="-108" width="341.1" height="20"/>
+    <text font-size="12.8" style="fill: #000000;text-anchor:start;font-family:monospace;font-style:italic;font-weight:700" x="1182" y="-94">+showSolution(in solution:Solution): string</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="999.606,7 1084.8,7 1084.8,-116 1171.29,-116 "/>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1158.64,-111 1174.64,-116 1158.64,-121 "/>
+  </g>
+</svg>

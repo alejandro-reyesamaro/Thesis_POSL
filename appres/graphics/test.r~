@@ -1,0 +1,22 @@
+png(
+  "test.png",
+  width     = 3.25,
+  height    = 3.25,
+  units     = "in",
+  res       = 1200,
+  pointsize = 4
+)
+
+plot_graphics(	y_par, 
+					y_11_100, 
+					y_11_50, 
+					y_11_25, 
+					0, 1.1, # y_min, y_max
+					c(s,s,r,s,s,r,r,s,r,r,s,r,rn,r,r,s,s,s,s,r,r,s,r,rn,s,r,s,r,s,s), 
+					c(r,r,s,r,r,s,b,s,b,b,s,s,r,s,b,s,b,b,b,r,r,r,r,b,b,b,s,r,b,b),
+					c(s,b,b,b,b,b,b,b,b,s,r,s,b,s,b,r,r,b,b,b,b,s,r,b,b,b,b,b,b,b), 
+					"100% communication 1 to 1", 
+					"50% communication 1 to 1", 	
+					"25% communication 1 to 1", 
+					"g11.pdf")
+dev.off()

@@ -1,0 +1,131 @@
+\modified{We use directly the neighborhood module $V_{AS}$ based on the {\it Adaptive Search} algorithm, and the selection module $S_{First}$ which selects the first configuration inside the neighborhood improving the current cost, to create the solvers, and studying communicating and non communicating strategies.}
+
+\begin{table}[h]
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{1.5cm}|R{2cm}R{2cm}|R{2cm}R{2cm}}
+	\hline %\noalign{\smallskip}	
+	\multirow{2}{*}{\footnotesize{\centering {\bf Instance}}} & \multicolumn{2}{c|}{\bf Sequential (1 core)} & \multicolumn{2}{c}{\bf No Comm. (40 cores)} \\
+	\cline{2-5}
+	& T & It. & T & It. \\	
+	\hline
+	2000 & & & 6.15 & 952 \\
+	3000 & & & 14.06 & 1,413 \\
+	4000 & & & 25.46 & 1,898 \\
+	5000 & & & 40.57 & 2,377 \\
+	6000 & & & 60.10 & 2,849 \\
+	\hline
+\end{tabular}
+\caption{Results for \NQP{} (no communication)}\label{tab:nqueens_seq}
+\end{table}
+
+\begin{table}[h]
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{1.5cm}|R{1.5cm}R{1.5cm}|R{1.5cm}R{1.5cm}|R{1.5cm}R{1.5cm}}
+	\hline %\noalign{\smallskip}	
+	\multirow{2}{*}{\footnotesize{\centering {\bf Instance}}} & \multicolumn{2}{c|}{\bf 25\% Comm.} & \multicolumn{2}{c|}{\bf 50\% Comm.} &  \multicolumn{2}{c}{\bf All Comm.}\\
+	\cline{2-7}
+	& T & It. & T & It. & T & It. \\	
+	\hline
+	2000 &  6.05 & 934 & 6.01 & 920 & \good{\bf 5.92} & \good{\bf 885} \\
+	3000 &  13.89 & 1,387 & 13.91 & 1,368 & \good{\bf 13.67} & \good{\bf 1,346}\\
+	4000 & 25.26 & 1,868 & 25.14 & 1,855 & \good{\bf 25.11} & \good{\bf 1,834}\\
+	5000 & 40.38 & 2,338 & 40.33 & 2,312 & \good{\bf 39.62} & \good{\bf 2,287}\\
+	6000 & 59.28 & 2,794 & 58.97 & 2,775 & \good{\bf 58.97} & \good{\bf 2,729}\\	
+	\hline
+\end{tabular}
+\caption{Results for \NQP{} (40 cores, communication 1~to~1)}\label{tab:nqueens_1to1}
+\end{table}
+
+\begin{table}[h]
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{1.5cm}|R{1.5cm}R{1.5cm}|R{1.5cm}R{1.5cm}|R{1.5cm}R{1.5cm}}
+	\hline %\noalign{\smallskip}	
+	\multirow{2}{*}{\footnotesize{\centering {\bf Instance}}} & \multicolumn{2}{c|}{\bf 25\% Comm.} & \multicolumn{2}{c|}{\bf 50\% Comm.} &  \multicolumn{2}{c}{\bf All Comm.}\\
+	\cline{2-7}
+	& T & It. & T & It. & T & It. \\	
+	\hline
+	2000 & 6.07 & 925 & \good{\bf 5.98} & 915 & 6.01 & \good{\bf 887}\\
+	3000 & 13.97 & 1,402 & 13.96 & 1,386 & \good{\bf 13.79} & \good{\bf 1,365}\\
+	4000 & 25.30 & 1,867 & 25.29 & 1,851 & \good{\bf 25.17} & \good{\bf 1,838}\\
+	5000 & 40.45 & 2,338 & 40.37 & 2,312 & \good{\bf 39.88} & \good{\bf 2,291}\\
+	6000 & 59.77 & 2,824 & 59.53 & 2,773 & \good{\bf 59.16} & \good{\bf 2,773}\\	
+	\hline
+\end{tabular}
+\caption{Results for \NQP{} (40 cores, communication 1~to~N)}\label{tab:nqueens_1toN}
+\end{table}
+
+\modified{\posl{}, as we can see in Tables~\ref{tab:nqueens_1to1} and~\ref{tab:nqueens_1toN}, works very well without communication, for instances relatively big. This confirms once again the success of the \om{} $V_{AS}$ based on {\it Adaptive Search} algorithm to solve these kind of problems. The parallel approach outperforms significantly the sequential one, as we can see in Table~\ref{tab:nqueens_seq}. Runtimes and iteration means showed in this Table are bigger than those presented in Tables~\ref{tab:nqueens_1to1} and~\ref{tab:nqueens_1toN}. However, the communication improve the non communicating results in terms of runtime and iterations, this improvement is not significant. In contrast to \SGP, \posl{} does not get trapped so often into local minima during the resolution of \NQP{}. For that reason, the shared information, once received and accepted by the receivers solvers, does not improves largely the current cost.}
+
+\modified{We can see the improvement with respect to the percentage of communicating solvers in Figure~\ref{fig:results_nq}. The bigger the instance is, the more significant the observed improvement is. This phenomenon suggests that a deeper study and an efficient implementation can make the communication playing a more significant role in the solution process.}
+
+\pgfplotsset{
+	myStyle/.style={grid=major,font=\Large}, ylabel= Communication rate,
+	xlabel=Number of cores,
+	legend style={at={(0.7,0.9)},
+	anchor=north}
+}
+
+\begin{figure}
+\centering
+\begin{tikzpicture} [scale=0.7]
+\begin{groupplot}[
+group style={
+	group name=my plots,
+	group size=1 by 5,
+	xlabels at=edge bottom,
+	xticklabels at=edge bottom,		
+	ylabels at=edge left,
+	yticklabels at=edge left,
+	vertical sep=0pt
+},
+legend style={at={(0.32,0.40)},anchor=north, legend columns=2},
+footnotesize,
+width=14cm,
+height=4.5cm,
+xlabel=\% of communicating solvers,
+ylabel= \empty,
+xmin=-5,
+xmax=105,
+ymin=0,	
+ymax=30,
+ytick={0,10,...,20},
+xtick={0,25,50,100},
+tickpos=left,
+ytick align=outside,
+xtick align=outside]
+
+\nextgroupplot %2000
+[ymin=5.6, ymax=6.2, ytick={5.7,5.8,5.9,6.0,6.1,6.2}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addlegendentry{1 to 1}
+\addplot coordinates{(0,6.15) (25,6.05) (50,6.01) (100,5.92)};
+\addlegendentry{1 to N}
+\addplot coordinates{(0,6.15) (25,6.07) (50,5.98) (100,6.01)};
+
+\nextgroupplot %3000
+[ymin=13.5, ymax=14.1, ytick={13.6,13.7,13.8,13.9,14.0,14.1}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addplot coordinates{(0,14.06) (25,13.89) (50,13.91) (100,13.67)};
+\addplot coordinates{(0,14.06) (25,13.97) (50,13.96) (100,13.79)};
+
+\nextgroupplot %4000
+[ymin=24.9, ymax=25.5, ytick={25.0,25.1,25.2,25.3,25.4,25.5}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}, ylabel= runtime (secs)]
+\addplot coordinates{(0,25.46) (25,25.25) (50,25.14) (100,25.11)};
+\addplot coordinates{(0,25.46) (25,25.30) (50,25.29) (100,25.17)};
+
+\nextgroupplot %5000
+[ymin=39.5, ymax=40.7, ytick={39.6,39.8,40.0,40.2,40.4,40.6}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addplot coordinates{(0,40.57) (25,40.38) (50,40.33) (100,39.62)};
+\addplot coordinates{(0,40.57) (25,40.45) (50,40.37) (100,39.88)};
+
+\nextgroupplot %6000
+[ymin=58.8, ymax=60.4, ytick={58.8,59.1,59.4,59.7,60.0,60.3}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addplot coordinates{(0,60.10) (25,59.28) (50,58.97) (100,58.97)};
+\addplot coordinates{(0,60.10) (25,59.77) (50,59.53) (100,59.16)};
+		
+\end{groupplot}
+\end{tikzpicture}
+\caption[]{Runtime means of instances \\2000-, 3000-, 4000-, 5000- and 6000-queens}
+\label{fig:results_nq}
+\end{figure}

@@ -1,0 +1,338 @@
+%----------------------------------------------------------------------------------------------
+%------ EXPERIMENTATION
+%----------------------------------------------------------------------------------------------
+\chapter{Experiments design}
+\label{chap:expe}
+\textit{In this chapter I expose all details about the process of evaluation of \posl{}, i.e., all experiments I perform. For each benchmark, I explain also used strategies in the evaluation process.}
+\vfill
+\minitoc
+\newpage
+
+In this chapter I illustrate and analyze the versatility of \posl{} studying different ways to solve constraint problems based on local search meta-heuristics. 
+I have chosen the \sgp, the \nqp, the \carrp{} and the \grp{} as benchmarks since they are two challenging yet differently structured problems. In this chapter I present formally each benchmark and explain the structure of \posl's solvers that I generated for experiments.
+
+
+%------------------------------------------
+%---- Social Golfers
+%------------------------------------------
+\section{Solving the \sgp}
+\label{sec:golfers}
+
+The \sgp{} (\SGP) consists in scheduling $n=g\times p$ golfers into $g$ groups of $p$ players every week for $w$ weeks, such that two players play in the same group at most once. An instance of this problem can be represented by the triple $g-p-w$. This problem, and other closely related problems, arise in many practical applications such as encoding, encryption, and covering problems~\cite{Lardeux2014}. Its structure is very attractive, because it is very similar to other problems, like \textit{Kirkman's Schoolgirl Problem} and the \textit{Steiner Triple System}, so efficient modules to solve a broad range of problems ca be built.
+
+Here, I give the abstract solver designed for this problem as well as concrete computation modules composing the different solvers I have tested:
+
+\begin{enumerate}
+	\item Generation module:
+	\subitem $I$: Generates a random configuration $s$, respecting the structure of the problem, {\it i.e.}, the configuration is a set of $w$ permutations of the vector $[1..n]$. 
+	\item Neighborhood modules:
+	\subitem $V_{Std}$: Defines the neighborhood $\mathcal{V}\left(s\right)$ swapping players among groups.
+	\subitem $V_{AS}$: Defines the neighborhood $\mathcal{V}\left(s\right)$ swapping the most culprit player with other players from the same week. It is based on the {\it Adaptive Search} algorithm.
+	\item Selection modules:
+	\subitem $S_{First}$: Selects the first configuration $s' \in \mathcal{V}\left(s\right)$ improving the current cost.
+	\subitem $S_{Best}$: Selects the best configuration $s' \in \mathcal{V}\left(s\right)$ improving the current cost.
+	\subitem $S_{Rand}$: Selects a random configuration $s' \in \mathcal{V}\left(s\right)$.
+	\item Acceptance module:
+	\subitem $A$: Evaluates an acceptance criteria for $s'$. We have chosen the classical module selecting the configuration with the lowest global cost, {\it i.e.}, the one which is likely the closest to a solution.
+\end{enumerate}
+
+A very first experiment was performed to select the best neighborhood function to solve the problem, comparing a basic solver using $V_{Std}$; a new solver using $V_{AS}$; and a combination of $V_{Std}$ and $V_{AS}$ by applying the operators $\circled{$\rho$}$, already introduced in the previous chapter. Algorithms~\ref{as:golfers10-10-3}, \ref{as:golfers_rho} and \ref{as:golfers_union} present the \as{} for each case, respectively.
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_union \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S, A$\;}{
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{%M_1^a \circled{$\rho$} M_1^b
+		$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} A\right]$}
+	}	
+}
+\caption{Standard \as{} for \SGP}\label{as:golfers10-10-3}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_union \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V_1, V_2, S, A$\;}{
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{%M_1^a \circled{$\rho$} M_1^b
+		$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[\left[V_1 \poslop{\rho} V_2\right] \poslop{\mapsto} S \poslop{\mapsto} A\right]$}
+	}	
+}
+\caption{\As{} combining neighborhood functions using operator {\it RHO}}\label{as:golfers_rho}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_union \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V_1, V_2, S, A$\;}{
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{%M_1^a \circled{$\rho$} M_1^b
+		$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[\left[V_1 \poslop{\cup} V_2\right] \poslop{\mapsto} S \poslop{\mapsto} A\right]$}
+	}	
+}
+\caption{\As{} combining neighborhood functions using operator {\it Union}}\label{as:golfers_union}
+\end{algorithm}
+
+Solvers mentioned above were too slow to solve instances of the problem with more than 3 weeks, so another solver implementing the \as{} described in Algorithm~\ref{as:golfers_b001} have been created, using $V_{AS}$ and combining $S_{First}$ and $S_{Rand}$: it tries a number of times to improve the cost, and if it is not possible, it picks a random neighbor for the next iteration. We also compared the $S_{First}$ and $S_{Best}$ selection modules.
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\;}{
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{%M_1^a \circled{$\rho$} M_1^b
+		$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} \left[S_1 \poslopcond{\Sci < K_3} S_2\right] \poslop{\mapsto} A\right]$}
+	}
+}
+\caption{\As{} for \SGP{} to scape from local minima}\label{as:golfers_b001}
+\end{algorithm}
+
+After that, the best solver to be communicating solvers to compare their performance with the non communicating strategies was chosen. The shared information is the current configuration. Algorithms~\ref{as:golfers_sender}~and~\ref{as:golfers_receiver} show that the communication is performed while applying the acceptance criterion of the new configuration for the next iteration. Here, solvers receive a configuration from an outer solver, and match it with their current configuration. Then solvers select the configuration with the lowest global cost. 
+%Using the communication operators, 
+We design different communication strategies. Either we execute a full connected solvers set, or a tuned combination of connected and unconnected solvers. Between connected solvers, we applied two different connections operations: connecting each sender solver with one receiver solver ({\it 1~to~1}), or connecting each sender solver with all receiver solvers ({\it 1~to~N}).
+%\begin{itemize} %\begin{inparaenum}
+%	\item {\it Full communication strategy}: all solvers are connected (either {\it 1 to 1}, or {\it 1 to N})
+%	\item \textit{Hybrid communication strategy}: A given percentage of solvers are connected and the others are non communicating solvers.
+%\end{itemize} %\end{inparaenum}
+
+\begin{algorithm}
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager\_sender \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{%	
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{%M_1^a \circled{$\rho$} M_1^b
+		$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} \left[S_1 \poslopcond{\Sci < K_3} S_2\right] \poslop{\mapsto} \llparenthesis A \rrparenthesis^o\right]$}
+	}
+}
+\caption{Communicating \as{} for \SGP{} (sender)}\label{as:golfers_sender}
+\end{algorithm}
+
+\begin{algorithm}
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager\_receiver \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}
+	\tet{\bf communication} : $C.M.$\;}{%	
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{%M_1^a \circled{$\rho$} M_1^b
+		$I \poslop{\mapsto}$\\
+		\While{$\left(\textbf{\Iter \% } K_2\right)$}{
+			$ V \poslop{\mapsto} \left[S_1 \poslopcond{\Sci < K_3} S_2\right] \poslop{\mapsto} \left[A \poslop{m} C.M.\right]$
+		}
+	}
+}
+\caption{Communicating \as{} for \SGP{} (receiver)}\label{as:golfers_receiver}
+\end{algorithm}
+
+%Obviously, the communication frequency have to be controlled, because it can slow down the search process. %\posl{} provides the conditional operator $\circled{?}$ that executes its first or second parameter, depending its given boolean criterion is true or not.
+
+
+%------------------------------------------
+%---- N - Queens
+%------------------------------------------
+\section{Solving the \nqp}
+
+The \nqp{} (\NQP) asks how to place $N$ queens on a chess board so that none of them can hit any other in one move. \modified{This problem was introduced in 1848 by the chess player Max Bezzelas the \textit{8-queen problem}, and years latter it was generalized as \textit{N-queen problem} by Franz Nauck. Since then many mathematicians, including Gauss, have worked on this problem. It finds a lot of applications, e.g., parallel memory storage schemes, traffic control, deadlock prevention, neural networks, constraint satisfaction problems, among others \cite{Bell2009}. Some studies suggest that the number of solution grows exponentially with the number of queens ($N$), but local search methods have been shown very good results for this problem \cite{Sosic1994}. For that reason we tested some communication strategies using \posl{}, to solve a problem relatively easy to solve using non communication strategies.}
+
+To handle this problem, we reused some modules used for the \sgp: the \textit{Selection} and \textit{Acceptance} modules. The new module is: 
+
+\begin{enumerate}
+	\item Neighborhood module:
+	\subitem $V_{AS}$: Defines the neighborhood $V\left(s\right)$ swapping the variable which contributes the most to the cost with other.
+\end{enumerate}
+
+\modified{Fors this problem we used a simple \as{} showing good results with no communication, based on the idea introduced in the section \ref{sec:golfers}, using the \om{} $S_{rand}$ to scape from local minima. The \as{} is presented in Algorithm~\ref{as:nq}.}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{
+	$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter < } K_1\right)$}{$ V \poslop{\mapsto} \left[S_1 \poslopcond{\Sci < K_2} S_2\right] \poslop{\mapsto} A$}	
+}
+\caption{\As{} for \NQP}\label{as:nq}
+\end{algorithm}
+
+Using solvers implementing this \as{} we create communicating solvers to compare their performance with the non communicating strategies. The shared information is the current configuration. Algorithms~\ref{as:nq_sender}~and~\ref{as:nq_receiver} show that the communication is performed while selecting a new configuration for the next iteration. We design different communication strategies. Either we execute a full connected solvers set, or a tuned combination of connected and unconnected solvers. Between connected solvers, we applied two different connections operations: connecting each sender solver with one receiver solver ({\it 1~to~1}), or connecting each sender solver with all receiver solvers ({\it 1~to~N}).
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager\_sender \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{
+	$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter < } K_1\right)$}{$ V \poslop{\mapsto} \left[\llparenthesis S_1 \rrparenthesis^o \poslopcond{\Sci < K_2} S_2\right] \poslop{\mapsto} A$}	
+}
+\caption{\As{} for \NQP{} (sender)}\label{as:nq_sender}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager\_receiver \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}
+	\tet{\bf communication} : $C.M.$\;}{%
+	$I \poslop{\mapsto}$\\
+		\While{$\left(\textbf{\Iter < } K_1\right)$}{$ V \poslop{\mapsto} \left[ \left[S_1 \poslopcond{\Iter \% K_2} \left[S_1 \poslop{m} C.M. \right]\right] \poslopcond{\Sci < K_3} S_2\right] \poslop{\mapsto} A$}	
+}
+\caption{\As{} for \NQP{} (receiver)}\label{as:nq_receiver}
+\end{algorithm}
+
+
+%----------------------------------------
+%----- COSTAS
+%----------------------------------------
+\section{Solving the \carrp}
+
+The \carrp{} (\CARRP) consists in finding a \textit{costas array}, which is an $n\times n$ grid containing $n$ marks such that there is exactly one mark per row and per column and the $n(n-1)/2$ vectors joining each couple of marks are all different. This is a very complex problem that finds useful application in some fields like sonar and radar engineering. It also presents an interesting characteristic: although the search space grows factorially, from order 17 the number of solutions drastically decreases~\cite{Drakakis2006}.
+
+To handle this problem, I have reused some modules used for the \sgp{} and \nqp: the {\it Neighborhood} \om{} used for \nq{}, and the \textit{Selection} and \textit{Acceptance} \oms{} used for both. The new modules are: 
+
+\begin{enumerate}
+	\item Generation module:
+	\subitem $I$: Generates a random configuration $s$, as a permutation of the vector $[1..n]$. 
+	\item Neighborhood module:
+	\subitem $V_{AS}$: Defines the neighborhood $V\left(s\right)$ swapping the variable which contributes the most to the cost with other.
+\end{enumerate}
+
+I have also added a {\it Reset} module ($R$), a mechanism to escape from local minima\footnote{It is based on the code from Daniel D\'{i}az available at \href{https://sourceforge.net/projects/adaptivesearch/}{https://sourceforge.net/projects/adaptivesearch/}}. The basic solver I use to solve this problem is presented in Algorithm~\ref{as:costas}, and I take it as a base to build all the different communication strategies. \modified{Basically, it is a classical local search iteration, where instead of performing restarts, it performs resets.} 
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_hard \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, R, V, S, A$\;}{ %\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{%
+	$I \poslop{\mapsto}$\\
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+		$R \poslop{\mapsto}$ % \left[\circlearrowleft (\text{\Iter}\% K_2) \left\{ M_V \longmapsto M_{\hat{S}} \longmapsto M_D\right\}\right]$\;
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} A\right]$}
+	}
+}
+\caption{Reset-based \as{} for \CARRP}\label{as:costas}
+\end{algorithm}
+
+The \as{} for the sender solver is presented in Algorithm~\ref{as:costas_sender}. Like for the \sgp, we design different communication strategies combining different percentages of communicating solvers and our two communication operators ({\it 1~to~1} and {\it 1~to~N}). However for this problem, we study the behavior of the communication performed at two different moments: while applying the acceptance criteria (Algorithm~\ref{as:costas_receiver_a}), and while performing a {\it reset} (Algorithms~\ref{as:costas_receiver_a},~\ref{as:costas_receiver_b}~and~\ref{as:costas_receiver_c}).
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_hard\_sender \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, R, V, S, A$\;}{ %\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{%
+	$I \poslop{\mapsto}$\\
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+		$R \poslop{\mapsto}$ 
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} \llparenthesis A \rrparenthesis^o \right]$}
+	}
+}
+\caption{Reset-based \as{} for \CARRP{} (sender)}\label{as:costas_sender}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_hard\_receiver\_a \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, R, V, S, A$\; %\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}
+	\tet{\bf communication} : $C.M.$\;}{%
+	$I \poslop{\mapsto}$\\
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+		$R \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} \left[A \poslop{m} C.M.\right]\right]$}
+	}
+}
+\caption{Reset-based \as{} for \CARRP{} (receiver, variant A)}\label{as:costas_receiver_a}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_hard\_receiver\_b \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, R, V, S, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}
+	\tet{\bf communication} : $C.M.$\;}{%
+	$I \poslop{\mapsto}$\\
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+		$\left[R \poslopcond{\Sci < K_3} \left[R \poslop{m} C.M.\right]\right] \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} A\right]$}
+	}
+}
+\caption{Reset-based \as{} for \CARRP{} (receiver, variant B)}\label{as:costas_receiver_b}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_hard\_receiver\_c \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, R, V, S, A$\; %\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}
+	\tet{\bf communication} : $C.M.$\;}{%
+	$I \poslop{\mapsto}$\\
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+		$\left[R \poslop{m} C.M.\right] \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} A\right]$}
+	}
+}
+\caption{Reset-based \as{} for \CARRP{} (receiver, variant C)}\label{as:costas_receiver_c}
+\end{algorithm}
+
+\section{Solving the \grp}
+
+\modified{The \grp{} (\GRP) problem consists in finding an ordered vector of $n$ distinct non-negative integers, called \textit{marks}, $m_1 < \dots < m_n$, such that all differences $m_i - m_j$ $(i > j)$ are all different. An instance of this problem is the pair $(o,l)$ where $o$ is the order of the problem, (i.e., the number of \textit{marks}) and $l$ is the length of the ruler (i.e., the last {\it mark}). We assume that the first \textit{mark} is always 0. This problem has been applied to radio astronomy, x-ray crystallography, circuit layout and geographical mapping \cite{Soliday1995}. 
+When we apply \posl{} to solve an instance of this problem sequentially, we can notice that it performs many {\it restarts} before finding a solution. For that reason we chose this problem to study a new communication strategy.}
+
+\modified{We use \grp{} instances to study a different communication strategy. This time we communicate the current configuration, to avoid its neighborhood, i.e., a {\it tabu} configuration. We reused some modules used in the resolution of \sg{} and \carr{} problems to design the solvers: the \textit{Selection} and \textit{Acceptance} modules. The new modules are:}
+
+\begin{enumerate}
+	\item Generation module:
+	\subitem \modified{$I$: Generates a random configuration $s$, respecting the structure of the problem, i.e., the configuration is an ordered vector of integers. This module takes into account a set of {\it tabu} configurations arrived via solver-communication (and also from the same solver) to construct the new configuration far enough from them.}
+	\item Neighborhood module:
+	\subitem \modified{$V$: Defines the neighborhood $\mathcal{V}\left(s\right)$ by changing one value while keeping the order, i.e., replacing the value $s_i$ by all possible values $s'_i \in D_i$ that satisfy $s_{i-1} < s'_i < s_{i+1}$.}
+\end{enumerate}
+
+\modified{We also add a module to insert a configuration into a \textit{tabu} list inside the solver. In Algorithm~\ref{as:golomb_sender} we present the \as{} used to send information (sender \as). When the module $T$ is executed, the solver is unable to find a better configuration around the current one, so it is assumed to be a local minimum, and it is sent to the receiver solver. Algorithm~\ref{as:golomb_receiver} presents an \as{} used to receive information (receiver \as). Based on the connection operator used in the communication strategy, this solver might receives one or many configurations. These configurations are the input of the generation module ($I$), and this module inserts all received configurations into a {\it tabu} list, and then generates a new first configuration, far from all configurations in the {\it tabu} list.}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_golomb\_sender \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S, A, T$\;}{
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+		$I \poslop{\mapsto}$ 
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} A\right]$} $\poslop{\mapsto} \llparenthesis T \rrparenthesis^o$
+	}
+}
+\caption{\As{} for \GRP{} (sender)}\label{as:golomb_sender}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_golomb\_receiver \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S, A, T$\;
+	\tet{\bf connection} : $C.M.$\;}{
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+		$\left[C.M. \poslop{\mapsto} I \right] \poslop{\mapsto}$ 
+		\whileinline{$\left(\textbf{\Iter \% } K_2\right)$}{$\left[V \poslop{\mapsto} S \poslop{\mapsto} A\right]$} $\poslop{\mapsto} \llparenthesis T \rrparenthesis^o$
+	}
+}
+\caption{\As{} for \GRP{} (receiver)}\label{as:golomb_receiver}
+\end{algorithm}

@@ -1,5 +1,6 @@
 \newcommand{\Aref}[1]{Appendix  \ref{#1}} %\thechapter
 
+%----------------- Colors --------------------------
 \definecolor{naranja}{RGB}{241,70,34}
 \definecolor{verde}{RGB}{104,198,135}
 \definecolor{dred}{RGB}{120,7,7}
@@ -9,32 +10,147 @@
 \definecolor{intenso}{RGB}{126,13,13}
 \definecolor{shadecolor}{RGB}{215,215,215}
 
+\definecolor{colorsender}{RGB}{0,128,255}
+
 %----------------- Commands --------------------------
+\newcommand{\tet}[1]{\textcolor{naranja}{#1}}
+\newcommand{\new}[1]{\textcolor{blue}{#1}}
+\newcommand{\modified}[1]{\textcolor{verde}{#1}}
+\newcommand{\highlight}[1]{\textcolor{red}{#1}}
+\newcommand{\good}[1]{\textcolor{dred}{\bf #1}}
+\newcommand{\commentary}[1]{\textcolor{verde}{#1}}
+\newcommand{\hsep}[1]{\hspace{7pt} #1}
+
+\newcommand{\nonreceiver}[1]{\textcolor{orange}{\bf #1}}
+\newcommand{\receiver}[1]{\textcolor{red}{\bf #1}}
+\newcommand{\sender}[1]{\textcolor{colorsender}{\bf #1}}
+\newcommand{\nocomm}[1]{\textcolor{black}{\bf #1}}
+
 \newcommand{\ale}{Alejandro {\sc Reyes Amaro}}
 \newcommand{\titre}{{\sc POSL}: A Parallel-Oriented Solver Language}
-\newcommand{\tet}[1]{\textcolor{naranja}{#1}}
-\newcommand{\new}[1]{\textcolor{dred}{#1}}
-\newcommand{\commentario}[1]{\textcolor{verde}{#1}}
-\newcommand{\hsep}[1]{\hspace{7pt} #1}
-\newcommand{\conf}{$s$}
-\newcommand{\af}{{\sc POSL}}
-\newcommand{\opch}{{\it open channel}}
-\newcommand{\dopch}{{\it data open channel}}
-\newcommand{\oopch}{{\it object open channel}}
-\newcommand{\sus}{{\it subscription}}
-\newcommand{\module}{{\it operation module}}
-\newcommand{\m}{{\it module}}
-\newcommand{\cstr}{{\it computation strategy}}
-\newcommand{\cm}{{\it compound module}}
+\newcommand{\posl}{{\sc POSL}}
+
+\newcommand{\om}{\omprefix{} module}
+\newcommand{\oms}{\om s}
+\newcommand{\INTROom}{{\it \omprefix{} module}}
+\newcommand{\opch}{communication module}
+\newcommand{\opchs}{\opch s}
+\newcommand{\INTROopch}{{\it \opch}}
+\newcommand{\dopch}{data \opch}
+\newcommand{\INTROdopch}{{\it \dopch}}
+\newcommand{\oopch}{object \opch}
+\newcommand{\INTROoopch}{{\it \oopch}}
+\newcommand{\comstr}{communication strategy}
+\newcommand{\comstrs}{communication strategies}
+\newcommand{\INTROcomstr}{{\it \comstr}}
+\newcommand{\omprefix}{computation}
+\newcommand{\bothmodules}{\omprefix{} and \opchs}
+\newcommand{\m}{module}
+\newcommand{\ms}{\m s}
+\newcommand{\INTROm}{{\it \m}}
+\newcommand{\as}{abstract solver}
+\newcommand{\ass}{\as s}
+\newcommand{\Ass}{Abstract solvers}
+\newcommand{\As}{Abstract solver}
+\newcommand{\absm}{abstract \m}
+\newcommand{\absms}{\absm s}
+\newcommand{\INTROas}{{\it \as}}
+\newcommand{\cm}{compound module}
+\newcommand{\cms}{\cm  s}
+\newcommand{\Cms}{Compound modules}
+\newcommand{\INTROcm}{{\it compound module}}
+\newcommand{\soset}{solver set}
+\newcommand{\sosets}{\soset s}
+\newcommand{\INTROsoset}{{\it \soset}}
+\newcommand{\jack}{communication jack}
+\newcommand{\jacks}{\jack s}
+\newcommand{\INTROjack}{{\it \jack}}
+\newcommand{\outlet}{communication outlet}
+\newcommand{\outlets}{\outlet s}
+\newcommand{\INTROoutlet}{{\it \outlet}}
+\newcommand{\operation}{operation}
+\newcommand{\INTROoperation}{{\it \operation}}
+\newcommand{\INTROcommoper}{\it communication operator}
+\newcommand{\INTROcommopers}{\it \INTROcommoper s}
+\newcommand{\commoper}{communication operator}
+\newcommand{\commopers}{\commoper s}
+\newcommand{\commstr}{communication strategy}
+\newcommand{\commstrs}{communication strategies}
+\newcommand{\oneTone}{one~to~one}
+\newcommand{\oneTn}{one~to~N}
+
+\newcommand{\poslop}[1]{\textbf{  }\circled{$#1$}\textbf{  }}
+\newcommand{\poslopcond}[1]{\textbf{  }\circled{?}_{#1}\textbf{  }}
+
+\newcommand{\solverposl}[1]{{\sc Solver}$_{#1}$}
+\newcommand{\eqsolverposl}[1]{\textbf{{\sc Solver}}_{#1}}
+
+\usepackage{stmaryrd}
 \newcommand{\lbk}{\left\llbracket}
 \newcommand{\rbk}{\right\rrbracket}
-\newcommand{\produce}{&\rightarrow}
+\newcommand{\parallelexec}[1]{\lbk#1\rbk_p}
+\newcommand{\lsendpar}{\llparenthesis}
+\newcommand{\rsenddatapar}{\rrparenthesis^d}
+\newcommand{\rsendmodulepar}{\rrparenthesis^m}
+\newcommand{\senddataop}[1]{\lsendpar#1\rsenddatapar}
+\newcommand{\sendmoduleop}[1]{\lsendpar#1\rsendmodulepar}
+
+\newcommand{\onetoone}{\poslop{\rightarrow}}
+\newcommand{\oneton}{\poslop{\rightsquigarrow}}
+
+\newcommand{\produce}{\hspace{5pt}\longmapsto\hspace{5pt}}
 \newcommand{\OR}{\hspace{5pt}|\hspace{5pt}}
+
+\newcommand{\TM}{$^{\scalebox{0.6}{\mbox{TM}}}$}
+\newcommand{\R}{$^{\scalebox{0.7}{\textregistered}}$}
+\newcommand{\curiosiphyfull}{Intel\R{} Xeon\TM{} E5-2680 v2 (10$\times$4 cores, 2.80GHz)}
+\newcommand{\curiosiphy}{Intel\R{} Xeon\TM{}}
+\newcommand{\mylaptopProc}{Intel Core i7-4702HQ 2.2 GHz}
+\newcommand{\mylaptopMemo}{16384 MB, Dual-channel DDR3L 1600 MHz}
+\newcommand{\mylaptopName}{Dell XPS 15}
+
+\newcommand{\pclass}[1]{\mbox{\textcolor{blue}{\textbf{#1}}}}
+\newcommand{\pmethod}[2]{\mbox{\textcolor{green}{\textbf{\it #1}}({\it #2})}}
+
 \def\chapterautorefname{Chapter}
 \usepackage{xspace}
 
+\usepackage{pgfplots}
+\usetikzlibrary{matrix}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=newest}
+
+% <Verbatim>
 \usepackage{fancyvrb}
-\fvset{frame=single,framesep=1mm,fontfamily=courier,fontsize=\scriptsize,numbers=left,framerule=.3mm,numbersep=1mm,commandchars=\\\{\}}
+\fvset{frame=single,framesep=1mm,fontfamily=courier,fontsize=\scriptsize,framerule=.3mm,numbersep=1mm,commandchars=\\\{\}} %numbers=left
+% </Verbatim>
+
+% <ConsoleLikeListing>
+\usepackage{tcolorbox,listings}
+\lstdefinestyle{mystyle}{
+     basicstyle=\ttfamily\bf\tiny\color{white}, %
+     moredelim=**[is][\color{red}]{@}{@}
+     %numbers=left, 
+     %numberstyle=\tiny, 
+     %numbersep=5pt     
+ }
+\tcbuselibrary{listings,skins,breakable}
+\newtcblisting{BGVerbatim}{
+      arc=0mm,
+      top=0mm,
+      bottom=0mm,
+      left=1mm,
+      right=0mm,
+      width=\textwidth,
+      boxrule=0.5pt,
+      colback=black,
+      colupper=white,
+      spartan,
+      listing only,
+      %listing options={style=mystyle},
+      breakable
+}
+% </ConsoleLikeListing>
 
 \newcommand{\textover}[2]{\begin{tabular}{c}#1\\#2\end{tabular}}
 \newcommand{\tablePILSresults}[1]{
@@ -55,6 +171,19 @@
 \newcommand{\csp}{\textit{CSP}}
 \newcommand{\csps}{\csp\textit{s}}
 \newcommand{\CP}{\textit{Constraint Programing}}
+
+\newcommand{\sg}{{\it Social Golfers}}
+\newcommand{\sgp}{\sg{} {\it Problem}}
+\newcommand{\SGP}{{\it SGP}}
+\newcommand{\nq}{{\it N-Queens}}
+\newcommand{\nqp}{\nq{} {\it Problem}}
+\newcommand{\NQP}{{\it NQP}}
+\newcommand{\carr}{{\it Costas Array}}
+\newcommand{\carrp}{\carr{} {\it Problem}}
+\newcommand{\CARRP}{{\it CAP}}
+\newcommand{\gr}{{\it Golomb Ruler}}
+\newcommand{\grp}{\gr{} {\it Problem}}
+\newcommand{\GRP}{{\it GRP}}
 
 \newtheorem{definition}{Definition}
 
@@ -84,3 +213,92 @@ bookmarksopenlevel=2
 \usepackage[framemethod=tikz]{mdframed}
 \usetikzlibrary{shadows}
 \newmdenv[shadow=true,shadowcolor=black,font=\sffamily,rightmargin=8pt]{shadedbox}
+
+\newcommand{\defname}[2]{ \begin{definition}\textbf{(#1)}
+#2
+\end{definition}}
+
+\newcommand{\myboxlist}[2]
+{
+\begin{list}{\boxed{#1 \arabic{qcounter}:~}}{\usecounter{qcounter}} \itemsep0em
+#2
+\end{list}
+}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+		\node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+
+
+%-----------------ALGORITHM2e--------------------------
+\usepackage{algorithm2e}
+\SetAlFnt{\small\sf}
+\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{verde}{#1}}
+\SetCommentSty{mycommfont}
+%\newsavebox{\mycode}
+\SetKwFor{While}{$[\circlearrowleft $}{}{$]$} %{\tet{\bf begin}}{\tet{\bf end}$]$}
+\SetKwIF{Strategy}{}{}{\tet{\bf abstract solver}: }{}{}{}{}
+\SetKwIF{oModule}{}{}{\tet{\bf computation} : }{}{}{}{}
+\SetKwIF{oChannel}{}{}{\tet {\bf connection} : }{}{}{}{}
+
+\SetKwBlock{Begin}{\tet{\bf begin}}{\tet{\bf end}}
+%\SetKwIF{If}{ElseIf}{Else}{if}{then}{else if}{else}{endif}
+\SetKwData{Iter}{{\sc Itr}}
+\SetKwData{Sci}{{\sc Sci}}
+\SetKwData{sec}{\text{  }\circled{$\mapsto$}\text{  }}
+\SetKwData{kdom}{{\bf oModule}}
+\SetKwData{kdoch}{{\bf oChannel}}
+\SetKwFunction{str}{\bf strategy}
+\SetKwFunction{solver}{\bf solver}
+\newcommand{\whileinline}[2] {$[\circlearrowleft $ #1 #2 $]$}%{$[\circlearrowleft $ #1 \tet{\bf begin} #2 \tet{\bf end}$]$}
+\newcommand{\algoindent}{\hspace{16pt}}
+
+
+\newcounter{qcounter}
+
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+%\usepackage{xcolor}
+%\usepackage{newverbs}
+%\newverbcommand{\bverb}{\color{blue}}{}
+
+\newenvironment{example}{\fontsize{10pt}{12pt}\fontfamily{phv}\selectfont}{\par}
+
+\definecolor{mycolor}{rgb}{0.122, 0.435, 0.698}% Rule colour
+\makeatletter
+\newcommand{\mybox}[1]{%
+  \setbox0=\hbox{#1}%
+  \setlength{\@tempdima}{\dimexpr\wd0+13pt}%
+  \begin{tcolorbox}[colframe=mycolor,boxrule=0.5pt,arc=4pt,
+      left=6pt,right=6pt,top=6pt,bottom=6pt,boxsep=0pt,width=\@tempdima]
+    #1
+  \end{tcolorbox}
+}
+\makeatother
+
+
+
+\usepackage{mdframed}
+\newmdenv[
+  topline=false,
+  bottomline=false,
+  skipabove=\topsep,
+  skipbelow=\topsep
+]{siderules}
+
+\newcommand{\poslexample}[1]{
+\begin{siderules}
+{\fontsize{10pt}{12pt}\fontfamily{phv}\selectfont #1}
+\end{siderules}
+}
+
+\usepackage{enumerate}
+\usepackage{bbding}
+\newcommand{\separation}{
+\begin{center}
+{\small \Asterisk{} \Asterisk{} \Asterisk{}}
+\end{center}
+\vspace{10pt}
+}

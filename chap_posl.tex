@@ -1,0 +1,96 @@
+%----------------------------------------------------------------------------------------------
+%------ POSL
+%----------------------------------------------------------------------------------------------
+\chapter{A Parallel-Oriented Language for Modeling Meta-Heuristic-Based Solvers}
+\label{chap:posl}
+\textit{In this chapter \posl{} is introduced as the main contribution of this thesis, and a new way to solve \csps{}. Its characteristics and advantages are summarized, and a general procedure to be followed is described, in order to build parallel solvers using \posl, followed by a detailed description of each of the single steps.}
+\vfill
+\minitoc
+\newpage
+
+\section{Introduction}
+
+Meta-heuristic methods, despite showing very good results solving \CSPs, they are frequently not enough for solve them, when they are applied to problem instances with extremely large search spaces. Most of these methods are sensible to their large number of parameters. For that reason, a first direction of this thesis was tackling the one of the weakest points of meta-heuristic methods: the parameters. In Chapter~\ref{chap:prior} a performed study applying {\sc ParamILS} to {\it Adaptive Search} in order to find a general parameter settings was presented. This experiment did not produce encouraging results, and for that reason it was decided to abandon the idea as the main direction of the thesis. However, I believe that it can be an idea to be considered as a future work.
+
+With the development of parallelism, opening new ways to tackle constrained problems, the accessibility to this technology to a broad public has also increased. It is available through multi-core personal computers, Xeon Phi cards and GPU video cards. For that reason it was decided focusing completely on the parallel approach. In Chapter~\ref{chap:prior} it was presented a study in which the problem-subdivision approach was applied to the resolution of {\it K-Medoids Problem}. The main goal of this work was generalizing the proposed ideas to similar problems. It was only a theoretical study because it was realised in parallel with what would latter be the main scientific contribution of this thesis.
+
+After analyzing all weak point of the most important previews works, another issue arises, frequently undervalued: the codding time, that is always long when codding parallel programs. This was the main motivation to start searching techniques for implementing parallel solution strategies with or without communication in a fast and easy way. The main goal was creating a tool providing:
+\begin{enumerate}
+\item An simple way to create \textit{flexible} solvers, i.e., solvers ables to be modified with a few effort.
+\item Fast and simple mechanisms to connect solvers, ables to exchange information.
+\item A way to create numerous and different parallel strategies designs, where different communicating and not communicating solvers can be combined, exploiting to the maximum computation resources. 
+\end{enumerate}
+
+\subsection{Precedents}
+
+During the development process, some inspired ideas were taken into account. {\sc Hyperion}$^2$ \cite{Brownlee2014} is a java framework for meta-- and hyper--heuristics built providing generic templates for a variety of local search and evolutionary computation algorithms, allowing quick prototyping with the possibility of reusing source code. A similar idea was proposed by Fukunaga~\cite{Fukunaga2008}, introducing an evolutionary approach that uses a simple composition operator to automatically discover new local search heuristics for SAT and to visualize them as combinations of blocks. The goal of this thesis is to create a tool offering the same advantages, but providing also a mechanism to define communication protocols between solvers. It must also provide a way to create an abstract solver by combining simple functions that we call \ms.  
+
+In~\cite{Landtsheer2015} is presented a framework to facilitate the development of search procedures by using \textit{combinators} to design features commonly found in search procedures as standard bricks and joining them. This approach can speed up the development and experimentation of search procedures when developing a specific solver based on local search. Martin et al.~\cite{Martin2016} propose an approach of using cooperating meta--heuristic based local search processes, using an asynchronous message passing protocol. The cooperation is based on the general strategies of pattern matching and reinforcement learning. The tool developed for this thesis, uses the combination of both ideas, where search process features can be combined and reused, and it is also possible to design communication strategies between solvers.
+
+\subsection{POSL}
+
+In this chapter is presented \posl{}, the main contribution of this thesis, as well as the different steps to build communicating parallel solvers with. It is proposed as a new way to implement \textit{solution algorithms} to solve \CSPs, through local-search meta-heuristics using the multi-walk parallel approach. It is based on improving step by step an initial configuration, driven by a \textit{cost function} provided by the user through the model. The implementation must follow the following stages.
+
+\begin{enumerate}
+\item The conceived \textit{solution algorithm} to solve the target problem is decomposed it into small modules of computation, which are implemented as separated {\it functions}. We name them \oms{} (see Figure~\ref{subfig:modules}, blue shapes). At this point it is crucial to find a good decomposition of its \textit{solution algorithm}, because it will have a significant impact in its future re-usage. 
+\item Deciding which information is interesting to \textit{receive} from other solvers. This information is encapsulated into another kind of component called \opch, allowing data transmission between solvers (see Figure~\ref{subfig:modules}, red shapes).
+\item A third stage is to ensemble the modules through \posl{}'s inner language %(the interested reader is referred to  Appendix~\tet{[...]}) 
+to create independent solvers.
+\item The parallel-oriented language based on operators provided by \posl{} (see Figure~\ref{subfig:as}, green shapes) allows the information exchange, and executing modules in parallel. In this stage the information that is interesting to be shared with other solvers is sent using operators. After that we can connect them using {\it communication operators}. This final entity is called a \INTROsoset{} (see Figure~\ref{subfig:conn}).
+\end{enumerate}
+
+\begin{figure}[h]
+	\centering
+	\subfloat[][Creating \posl's modules]{
+		\label{subfig:modules}
+		\includegraphics[width=0.4\linewidth]{modules_1.png}
+	}\\
+	\subfloat[][Assembling modules using \posl's operators]{%
+		\label{subfig:as}
+		\includegraphics[width=0.6\linewidth]{example_1.png}
+	}\\
+	\subfloat[][Connecting \posl{} solvers to create \comstrs]{%
+		\label{subfig:conn}
+		\includegraphics[width=0.6\linewidth]{conn.png}
+	}
+	\caption[]{Solver construction process using \posl}
+	\label{fig:posl}
+\end{figure}
+
+%Once the solvers set is ready, the last step is to model the problem to solve. To do so, the user must follow the framework specification to implement the benchmark, respecting some requirements. The most important one is to implement a {\it cost function} computing the cost for a given configuration, i.e., an integer indicating how much the configuration violates the set of constraints. This integer equals zero if the configuration is a solution.
+
+In the following sections all these steps are explained in details, but first, I explain how to model the target benchmark using \posl.
+
+\section{Modeling the target benchmark}
+\label{sec:model}
+
+\input{sect_model}
+
+\section{First stage: creating \posl's modules}
+\label{sec:1ststage}
+
+\input{sect_1}
+
+\section{Second stage: assembling \posl's modules}
+\label{sec:2ndstage}
+
+\input{sect_2}
+
+\section{Third stage: creating \posl{} solvers}
+\label{sec:3rdstage}
+
+\input{sect_3}
+
+\section{Forth stage: connecting solvers}
+\label{sec:4thstage}
+
+\input{sect_4}
+
+\section{Summarize}
+\label{sec:posl_zum}
+
+In this chapter \posl{} have been formally presented, as a Parallel--Oriented Solver Language to build meta-heuristic-based solver to solve \CSPs{}. This language provides a set of \oms{} useful to solve a wide range of constrained problems. It is also possible to create new ones, through the low-level framework in C++ programming language. \posl{} also provides a set of \opchs{}, essential features to share information between solvers.
+
+One of the \posl's advantages is the possibility of creating, using an operator-based language, \ass{} remaining independent from concrete \bothmodules{}. It is then possible to create many different solvers builded upon the same \as{} by only instantiating different modules. It is also possible to create different \comstrs{} upon the same \soset{} by using {\it connection operators} that \posl{} provides.
+
+In the next chapter, a detailed study of various communicating and non-communicating strategies is presented using some \CSPs{} as benchmarks. %In this study, is showed the efficacy of \posl{} to analyze quickly and easily these strategies.

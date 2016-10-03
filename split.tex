@@ -1,13 +1,11 @@
 % At the very end of this section 5.1.2, by one small sentence like:
 % This work falls within the framework of the Ulysse project between France and Ireland.
 
-As was previously said, a way to tackle huge combinatorial problems in parallel is to split the search space. In this section, the {\it problem subdivision} approach was adopted to divide the domain of a given problem, in this particular case, to solve the {\it k-medoids problem} in parallel \footnote{This work falls within the framework of the Ulysses project between France and Ireland}.
+Usually, to solve some problem using parallelism, our first thought is either partitioning the problem into a set of sub-problems, or dividing its search space. In both cases, the idea is to solve a set of problems, all of them smaller and easer than the original one, and combining all the solution to obtain the solution of the original problem. In \cite{Arbelaez2012} a study of the impact of space-partitioning techniques on the performance of parallel local search algorithms to tackle the \textit{k-medoids} clustering problem is presented. The authors use a parallel local search, in order to improve the scalability of the sequential algorithm, which is measured, in terms of the quality of the solution, with respect to the sequential algorithm. In this work two main techniques for domain partitioning are presented: {\it space-filling curves}, used to reduce any n-dimensional representation into a one-dimension space; and {\it k-Means} algorithm. We found that the used methods for domain partitioning do not take into account the number of clients associated to each new sub-domain. This results in an unbalanced distributions of workload phenomenon. For that reason the goal of this study was designing some ideas to tackle the same problem. \footnote{This work falls within the framework of the Ulysses project between France and Ireland.}
 
-% a way to tackle huge combinatorial problems in parallel is spliting the search space. => problem subdivision. 
+The \textit{k-medoids} problem aims to select a subset $M$ of $k$ points (the medoids) from a set of points $S$, such that the average distance from any point to its closest medoid is minimized. It finds a lot of applications in the industry, like in resource allocation, data mining, among others. It is quite similar to \textit{k-means} problem, except that the set of medoids $M$ is forced to be a subset of $S$.
 
-In \cite{Arbelaez2012} two main techniques are presented for domain partitioning: first, {\it space-filling curves}, used to reduce any N-dimensional representation into a one-dimension space (this technique is also widely used in the nearest-neighbor-finding problem \cite{Chen2005}); and second, {\it k-Means} algorithm, one of the most popular clustering algorithms \cite{Berkhin2002}. In this work we found that the methods used for domain partitioning do not take into account the number of clients associated to each new sub-domain. This results in an unbalanced distributions of workload phenomenon. That's why our goal was designing some ideas to tackle this problem, perhaps not through an exact manner, but at least more approximated.
-
-First, we propose {\bf Algorithm \ref{algo}}, which represents the backbone of our idea. This algorithm takes a set of $\mathbb{R}^2$ {\it points} (representing the locations of the clients) and returns a partition of size $K$. Such a set of points is called a {\it domain} and the partition a {\it sub-domain}. At each intermediate step $i$, we have a set (list) of sub-domains. The algorithm takes the most populated one, splits it into two (or four, depending on the strategy) new sub-domains and includes them in the list. The stop condition will depends on the fallowed approach (see below).
+We propose Algorithm~\ref{algo}, which represents the backbone of our idea. This algorithm takes a set of $\mathbb{R}^2$ {\it points} (representing the locations of the clients) and returns a partition of size $K$. Such a set of points is called a {\it domain} and the partition a {\it sub-domain}. At each intermediate step $i$, we have a set (list) of sub-domains. The algorithm takes the most populated one, splits it into two (or four, depending on the strategy) new sub-domains and includes them in the list. The stop condition will depends on the fallowed approach (see below).
 
 \incmargin{1.4em}
 \linesnumbered
@@ -44,15 +42,15 @@ First, we propose {\bf Algorithm \ref{algo}}, which represents the backbone of o
 First of all, we make clear some details of the algorithm exposed above:
 
 \begin{itemize}
-\item \texttt{Insert($\dots$)} Inserts a set (or two) into the data structure \footnote{The design is not decided yet, because first we need to know some implementations details about the tool already coded by the Ireland team}.
+\item \texttt{Insert($\dots$)} Inserts a set (or two) into the data structure. % \footnote{The design was decided, because first we need to know some implementations details about the tool already coded by the Ireland team}.
 \item \texttt{GetNext()} Returns the next sub-set to be divided, tacking into account the {\it split strategy} (see below).
 \item \texttt{Split($\dots$)} Returns two sub-domains as a subdivision of the given domain (parameter).
 \end{itemize}
 
-In the next sub-sections we will answer two main question arising at this point:
+In the next sub-sections we answer two main question arising at this point:
 
 \begin{enumerate}
-\item \textit{How to split the each sub-domain?} ($<$\emph{Split}$>$ function on line \ref{paso3}) It refers to, given a set of points (locations), how to decide which of them will be included in one sub-domain and which of them in the other.
+\item \textit{How to split the each sub-domain?} ($<$\emph{Split}$>$ function on line \ref{paso3}) It refers to, given a set of points (locations), how to decide which of them will be included into one sub-domain and which of them into the other.
 \item \textit{How much to split each sub-domain?} ($<$\emph{some condition}$>$ on line \ref{paso_condicion}) It refers to decide when to stop splitting the domain.
 \end{enumerate}
 
@@ -63,16 +61,16 @@ In order to split the domain, we can think in some approaches, taking into accou
 % itemize variants, give the main idea in 1 or 2 paragraphs for each variant.
 
 \begin{enumerate}
-\item {\bf one metro-node per core}: In this variant we can assign one metro-node to each core, and in this case, split the domain in $K$ sub-domains ($K$ is the number of cores). It means that the algorithm will compute the best position for a metro-node in a current sub-domain. \label{var1}
+\item {\bf one metro-node per core}: In this variant we can assign one metro-node to each core, and in this case, splitting the domain in $K$ sub-domains ($K$ is the number of cores). It means that the algorithm will compute the best position for a metro-node in a current sub-domain. \label{var1}
 \begin{itemize}
 \item In this case we only have to replace the line \ref{paso_condicion} by something like:  \textcolor{gray}{{\bf for} $i \leftarrow 1$ {\bf to} $N$ {\bf do} $\dots$}, 
 where $N$ is the number of metro-nodes.
 \item The ideal scenario here is when $N = K$ which is not probable at all. So we only should study the case when they are different
-\item In that case, we need to distribute efficiently the metro-nodes into the domain subdivisions, but here, one possible scenario arise: it can be happen that (depending on the followed domain-split strategy) we were trying to allocate a metro-node into an area with a few clients. This produce a very local point of view of the problem. That's why we propose the following \textit{second variant}.
+\item In that case, we need to distribute efficiently the metro-nodes into the domain subdivisions, but here, one possible scenario arise: it can be happen that, depending on the followed domain-split strategy, we were trying to allocate a metro-node into an area with a few clients. This produce a very local point of view of the problem. That is the reason why we propose the following \textit{second variant}.
 \end{itemize}
 \item {\bf Incomplete partition}: To split a sub-domain if it can generate sub-sub-domains containing at least $C$ clients. It means, for example, if there exist in list a sub-domain with 8 clients, and the number $C$ is fixed in $C = 5$, this sub-domain can not be divided, because it will generate for sure a sub-sub-domain with less that 5 clients. In this case more than one metro-node would be allocated in some of those specific sub-domains, because we will have more metro-nodes than sub-domains in our model.\label{var2}
 \begin{itemize}
-\item Of course, using this variant we can find situations described in the first variant. I that case we should proceed consequently.
+\item Of course, using this variant we can find situations described in the first variant. In that case we should proceed consequently.
 \end{itemize}
 \item {\bf Combination}: This variant is just a combination of the two previous variants. Then, we will be working with two parameters: \label{var3}
 \begin{itemize}
@@ -141,8 +139,8 @@ In all of them the number of clients in each sub-domain is taken into account, b
 \begin{itemize}
 \item \underline{Split criterion}: {\it Geometrical} $\rightarrow$ Dividing the region in tow parts with the same area.
 \item \underline{Cut point}: The middle point of the x--axis (or y--axis, depending on the shape)
-\item \underline{Result}: Two equal regions, but with different amount of clients (see Figure ~\ref{norm:geom}). In the next step, the next sub-domain to divide will be, from those already divided, the most populated one (the sub-domain with more clients).
-\item \underline{Problem}: Maybe we need to divide a sub-domain because it has a lot of client, but in the other hand it generate a sub-domain with a few clients, as you can see in the Figure ~\ref{fig:badGeom}.
+\item \underline{Result}: Two equal regions, but with different amount of clients (see Figure~\ref{norm:geom}). In the next step, the next sub-domain to divide will be, from those already divided, the most populated one (the sub-domain with more clients).
+\item \underline{Problem}: Maybe we need to divide a sub-domain because it has a lot of client, but in the other hand it generate a sub-domain with a few clients, as you can see in the Figure~\ref{fig:badGeom}.
 \item \underline{Benefit}: Very fast split. If we attack scenarios with point uniformly distributed, the behavior is pretty much desirable, as we can see in the Figure ~\ref{unif:geom}. 
 \end{itemize}
 
@@ -150,18 +148,18 @@ In all of them the number of clients in each sub-domain is taken into account, b
 \begin{itemize}
 \item \underline{Split criterion}: The number of clients, i.e., a sub-domain is divided in such a way that in the resulting sub-sub-domains there will be the same number of clients.
 \item \underline{Cut point}: The current sub-domain is ordered and the x--axis (or y--axis, depending on the shape) of the element (location of the client) right in the center is selected to be the {\it cut point}
-\item \underline{Result}: Two regions with the same ($\pm 1$) amount of clients (see Figure ~\ref{norm:geom}). In the next step, the next sub-domain to divide will be, from those already divided, the most populated one (the sub-domain with more clients).
+\item \underline{Result}: Two regions with the same ($\pm 1$) amount of clients (see Figure~\ref{norm:geom}). In the next step, the next sub-domain to divide will be, from those already divided, the most populated one (the sub-domain with more clients).
 \item \underline{Problem}: The subdivision process is a bit more costly: we need to group the clients on both sides of a {\it perfect pivot}\footnote{Element of a set with the same number of elements lower and greater than him}.
 \item \underline{Benefit}: It guarantees the same cardinality in both new sub-sub-domains.
 \end{itemize}
 
 \item {\bf Mean Split}
 \begin{itemize}
-\item \underline{Split criterion}: This is a mid-point strategy between the two previous. The goal is to find a {\it cut point} to group the elements of the current sub-domain, but in a easy way (fast), that's why we don't compute the exact middle point to produce two sub-sub-domains with the same cardinality, as in the previous approach, instead of that we work with his expected value: the arithmetic mean.
+\item \underline{Split criterion}: This is a mid-point strategy between the two previous. The goal is to find a {\it cut point} to group the elements of the current sub-domain, but in a easy way (fast), for that reason we do not compute the exact middle point to produce two sub-sub-domains with the same cardinality, as in the previous approach, instead of that we work with his expected value: the arithmetic mean.
 \item \underline{Cut point}: We compute the mean of the $x$--axis (or $y$--axis) of the elements (locations) of the current sub-domain, and it will be the {\it cut point}
 \item \underline{Result}: Two regions with not exact information about their sizes or their cardinality.
 \item \underline{Problem}: {\it Idem.}
-\item \underline{Benefit}: The {\it cut point} can be obtained by a $O(n)$ number of operations. As we can see in the preliminary results\footnote{The experiments are coded in R\cite{Paradis2005}.} (Figure \ref{fig:goodMeanNorm} and \ref{fig:goodMeanUnif}), the behaviour of this technique is near to the {\it cardinal split} technique, at least for normally and uniformly distributed sets of point.
+\item \underline{Benefit}: The {\it cut point} can be obtained by a $O(n)$ number of operations. As we can see in the preliminary results\footnote{The experiments are coded in R\cite{Paradis2005}.} (Figures~\ref{fig:goodMeanNorm} and \ref{fig:goodMeanUnif}), the behavior of this technique is near to the {\it cardinal split} technique, at least for normally and uniformly distributed sets of point.
 \end{itemize}
 \end{enumerate}
 
@@ -217,4 +215,4 @@ In all of them the number of clients in each sub-domain is taken into account, b
 
 \subsection{Conclusion}
 
-This is a theoretical work that we have not validated, because we decide to tackle the problem using a different approach that we will explain in the next section.
+In this section we present a theoretical and not validated work where we applied the {\it search space subdivision} approach to solve {\it k-medoids problem} in parallel. We have proposed some different strategies and we have showed graphically some characteristics of them. 

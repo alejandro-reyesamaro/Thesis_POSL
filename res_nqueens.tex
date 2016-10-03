@@ -1,0 +1,265 @@
+\modified{In this section I present the performed study using \nqp{} (\NQP) as a benchmark.}
+
+\subsection{Problem definition}
+
+The \nqp{} (\NQP) asks how to place $N$ queens on a chess board so that none of them can hit any other in one move. \modified{This problem was introduced in 1848 by the chess player Max Bezzelas as the \textit{8-queen problem}, and years latter it was generalized as \textit{N-queen problem} by Franz Nauck. Since then many mathematicians, including Gauss, have worked on this problem. It finds a lot of applications, e.g., parallel memory storage schemes, traffic control, deadlock prevention, neural networks, constraint satisfaction problems, among others \cite{Bell2009}. Some studies suggest that the number of solution grows exponentially with the number of queens ($N$), but local search methods have been shown very good results for this problem \cite{Sosic1994}. For that reason we tested some communication strategies using \posl{}, to solve a problem relatively easy to solve using non communication strategies.}
+
+\modified{The cost function for this benchmark was implemented in C++ based on the current implementation of {\it Adaptive Search}\footnote{It is based on the code from Daniel D\'{i}az available at \href{https://sourceforge.net/projects/adaptivesearch/}{https://sourceforge.net/projects/adaptivesearch/}}.}
+
+\subsection{Experiment design Nr. 1}
+
+To handle this problem, I reused some modules used for the \sgp: the \textit{Selection} and \textit{Acceptance} modules. The new module is: 
+
+\begin{enumerate}
+	\item Neighborhood module:
+	\subitem $V_{AS}$: Defines the neighborhood $V\left(s\right)$ swapping the variable which contributes the most to the cost with other.
+\end{enumerate}
+
+\modified{Fors this problem I used a simple \as{} showing good results with no communication, based on the idea introduced in the section \ref{sec:golfers}, using the \om{} $S_{rand}$ to scape from local minima. The \as{} is presented in Algorithm~\ref{as:nq}.}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{
+	$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter < } K_1\right)$}{$ V \poslop{\mapsto} \left[S_1 \poslopcond{\Sci < K_2} S_2\right] \poslop{\mapsto} A$}	
+}
+\caption{\As{} for \NQP}\label{as:nq}
+\end{algorithm}
+
+Using solvers implementing this \as{} we create communicating solvers to compare their performance with the non communicating strategies. The shared information is the current configuration. Algorithms~\ref{as:nq_sender}~and~\ref{as:nq_receiver} show that the communication is performed while selecting a new configuration for the next iteration. We design different communication strategies. Either I execute a full connected solvers set, or a tuned combination of connected and unconnected solvers. Between connected solvers, I have applied two different connections operations: connecting each sender solver with one receiver solver ({\it 1~to~1}), or connecting each sender solver with all receiver solvers ({\it 1~to~N}).
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager\_sender \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{
+	$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter < } K_1\right)$}{$ V \poslop{\mapsto} \left[\llparenthesis S_1 \rrparenthesis^o \poslopcond{\Sci < K_2} S_2\right] \poslop{\mapsto} A$}	
+}
+\caption{\As{} for \NQP{} (sender)}\label{as:nq_sender}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_eager\_receiver \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S_1, S_2, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}
+	\tet{\bf communication} : $C.M.$\;}{%
+	$I \poslop{\mapsto}$\\
+		\While{$\left(\textbf{\Iter < } K_1\right)$}{$ V \poslop{\mapsto} \left[ \left[S_1 \poslopcond{\Iter \% K_2} \left[S_1 \poslop{m} C.M. \right]\right] \poslopcond{\Sci < K_3} S_2\right] \poslop{\mapsto} A$}	
+}
+\caption{\As{} for \NQP{} (receiver)}\label{as:nq_receiver}
+\end{algorithm}
+
+\subsection{Results analysis of experiment Nr. 1}
+
+\modified{I use directly the neighborhood module $V_{AS}$ based on the {\it Adaptive Search} algorithm, and the selection module $S_{First}$ which selects the first configuration inside the neighborhood improving the current cost, to create solvers, and studying communicating and non communicating strategies.}
+
+\begin{table}[h]
+\centering 
+\renewcommand{\arraystretch}{1}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{p{1.3cm}|R{1.3cm}R{1.3cm}R{1.3cm}R{1.3cm}|R{1.3cm}R{1.3cm}R{1.3cm}R{1.3cm}}
+	\hline %\noalign{\smallskip}	
+	\multirow{2}{*}{\footnotesize{\centering {\bf Instance}}} & \multicolumn{4}{c|}{\bf Sequential (1 core)} & \multicolumn{4}{c}{\bf No Comm. (40 cores)} \\
+	\cline{2-9}
+	& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) \\	
+	\hline
+	2000 & 6.20 & 0.12 & 947 & 21 & 6.15 & 0.20 & 952 & 20 \\
+	3000 & 14.19 & 0.21 & 1,415 & 22 & 14.06 & 0.33 & 1,413 & 25 \\
+	4000 & 25.63 & 0.36 & 1,900 & 28 & 25.46 & 0.51 & 1,898 & 34 \\
+	5000 & 41.37 & 0.44 & 2,367 & 26 & 40.57 & 0.91 & 2,377 & 32 \\
+	6000 & 60.42 & 0.52 & 2,837 & 31 & 60.10 & 0.70 & 2,849 & 43 \\
+	\hline
+\end{tabular}
+}
+\caption{Results for \NQP{} (no communication)}\label{tab:nqueens_seq}
+\end{table}
+
+\begin{table}[h]
+\centering 
+\renewcommand{\arraystretch}{1}
+\newcommand{\cwnq}{1.1cm}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{p{1.3cm}|R{\cwnq}R{\cwnq}R{\cwnq}R{\cwnq}|R{\cwnq}R{\cwnq}R{\cwnq}R{\cwnq}|R{\cwnq}R{\cwnq}R{\cwnq}R{\cwnq}}
+	\hline %\noalign{\smallskip}	
+	\multirow{2}{*}{\footnotesize{\centering {\bf Instance}}} & \multicolumn{4}{c|}{\bf 25\% Comm.} & \multicolumn{4}{c|}{\bf 50\% Comm.} &  \multicolumn{4}{c}{\bf All Comm.}\\
+	\cline{2-13}
+	& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) \\	
+	\hline
+	2000 & 6.05 & 0.25 &  934 & 36 & 6.01 & 0.19 & 920 & 41 & 5.92 & 0.17 & 885 & 49\\ 
+	3000 & 13.89 & 0.28 & 1,387 & 48 & 13.91 & 0.30 & 1,368 & 51 & 13.67 & 0.39 & 1,346 & 40 \\
+	4000 & 25.26 & 0.63 & 1,868 & 43 & 25.14 & 0.50 & 1,855 & 50 & 25.11 & 0.39 & 1,834 & 58 \\
+	5000 & 40.38 & 0.93 & 2,338 & 71 & 40.33 & 0.66 & 2,312 & 69 & 39.62 & 1.07 & 2,287 & 44 \\
+	6000 & 59.28 & 1.34 & 2,794 & 78 & 58.97 & 1.19 & 2,775 & 67 & 58.97 & 1.38 & 2,729 & 78 \\	
+	\hline
+\end{tabular}
+}
+\caption{Results for \NQP{} (40 cores, communication 1~to~1)}\label{tab:nqueens_1to1}
+\end{table}
+
+\begin{table}[h]
+\centering 
+\renewcommand{\arraystretch}{1}
+\newcommand{\cwnq}{1.1cm}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{p{1.3cm}|R{\cwnq}R{\cwnq}R{\cwnq}R{\cwnq}|R{\cwnq}R{\cwnq}R{\cwnq}R{\cwnq}|R{\cwnq}R{\cwnq}R{\cwnq}R{\cwnq}}
+	\hline %\noalign{\smallskip}	
+	\multirow{2}{*}{\footnotesize{\centering {\bf Instance}}} & \multicolumn{4}{c|}{\bf 25\% Comm.} & \multicolumn{4}{c|}{\bf 50\% Comm.} &  \multicolumn{4}{c}{\bf All Comm.}\\
+	\cline{2-13}
+	& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) \\	
+	\hline
+	2000 & 6.07 & 0.15 & 925 & 41 & 5.98 & 0.19 & 915 & 41 & 6.01 & 0.19 & 887 & 57 \\
+	3000 & 13.97 & 0.34 & 1,402 & 49 & 13.96 & 0.31 & 1,386 & 52 & 13.79 & 0.32 & 1,365 & 65 \\
+	4000 & 25.30 & 0.57 & 1,867 & 52 & 25.29 & 0.42 & 1,851 & 66 & 25.17 & 0.47 & 1,838 & 65 \\
+	5000 & 40.45 & 0.80 & 2,338 & 80 & 40.37 & 0.56 & 2,312 & 56 & 39.88 & 0.71 & 2,291 & 51 \\
+	6000 & 59.77 & 1.50 & 2,824 & 49 & 59.53 & 0.98 & 2,773 & 69 & 59.16 & 1.37 & 2,773 & 57 \\	
+	\hline
+\end{tabular}
+}
+\caption{Results for \NQP{} (40 cores, communication 1~to~N)}\label{tab:nqueens_1toN}
+\end{table}
+
+\modified{\posl{}, as it can be seen} in Tables~\ref{tab:nqueens_1to1} and~\ref{tab:nqueens_1toN}, works very well without communication, for instances relatively big. This confirms once again the success of the \om{} $V_{AS}$ based on {\it Adaptive Search} algorithm to solve these kind of problems. That is the reason why the parallel approach does not outperforms significantly the sequential one, as we can see in Table~\ref{tab:nqueens_seq}. However, the communication improve the non communicating results in terms of runtime and iterations, but this improvement is not significant. In contrast to \SGP, \posl{} does not get trapped so often into local minima during the resolution of \NQP{}. For that reason, the shared information, once received and accepted by the receivers solvers, does not improves largely the current cost.
+
+\modified{We can see the improvement with respect to the percentage of} communicating solvers in Figure~\ref{fig:results_nq}. The bigger the instance is, the more significant the observed improvement is. This phenomenon suggests that a deeper study and an efficient implementation can make the communication playing a more significant role in the solution process. For that reason, I decided to design another experiment to try to improve the results using communicating strategies using \posl.
+
+\pgfplotsset{
+	myStyle/.style={grid=major,font=\Large}, ylabel= Communication rate,
+	xlabel=Number of cores,
+	legend style={at={(0.7,0.9)},
+	anchor=north}
+}
+
+\begin{figure}
+\centering
+\begin{tikzpicture} [scale=0.7]
+\begin{groupplot}[
+group style={
+	group name=my plots,
+	group size=1 by 5,
+	xlabels at=edge bottom,
+	xticklabels at=edge bottom,		
+	ylabels at=edge left,
+	yticklabels at=edge left,
+	vertical sep=0pt
+},
+legend style={at={(0.32,0.40)},anchor=north, legend columns=2},
+footnotesize,
+width=14cm,
+height=4.5cm,
+xlabel=\% of communicating solvers,
+ylabel= \empty,
+xmin=-5,
+xmax=105,
+ymin=0,	
+ymax=30,
+ytick={0,10,...,20},
+xtick={0,25,50,100},
+tickpos=left,
+ytick align=outside,
+xtick align=outside]
+
+\nextgroupplot %2000
+[ymin=5.6, ymax=6.2, ytick={5.7,5.8,5.9,6.0,6.1,6.2}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addlegendentry{1 to 1}
+\addplot coordinates{(0,6.15) (25,6.05) (50,6.01) (100,5.92)};
+\addlegendentry{1 to N}
+\addplot coordinates{(0,6.15) (25,6.07) (50,5.98) (100,6.01)};
+
+\nextgroupplot %3000
+[ymin=13.5, ymax=14.1, ytick={13.6,13.7,13.8,13.9,14.0,14.1}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addplot coordinates{(0,14.06) (25,13.89) (50,13.91) (100,13.67)};
+\addplot coordinates{(0,14.06) (25,13.97) (50,13.96) (100,13.79)};
+
+\nextgroupplot %4000
+[ymin=24.9, ymax=25.5, ytick={25.0,25.1,25.2,25.3,25.4,25.5}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}, ylabel= runtime (secs)]
+\addplot coordinates{(0,25.46) (25,25.25) (50,25.14) (100,25.11)};
+\addplot coordinates{(0,25.46) (25,25.30) (50,25.29) (100,25.17)};
+
+\nextgroupplot %5000
+[ymin=39.5, ymax=40.7, ytick={39.6,39.8,40.0,40.2,40.4,40.6}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addplot coordinates{(0,40.57) (25,40.38) (50,40.33) (100,39.62)};
+\addplot coordinates{(0,40.57) (25,40.45) (50,40.37) (100,39.88)};
+
+\nextgroupplot %6000
+[ymin=58.8, ymax=60.4, ytick={58.8,59.1,59.4,59.7,60.0,60.3}, cycle list ={{red, mark options={fill=red,scale=0.8},mark=*}, {blue, mark options={fill=blue,scale=0.8},mark=*}, {green, mark options={fill=green,scale=0.8},mark=*}, {orange, mark options={fill=orange,scale=0.8},mark=x}}]
+\addplot coordinates{(0,60.10) (25,59.28) (50,58.97) (100,58.97)};
+\addplot coordinates{(0,60.10) (25,59.77) (50,59.53) (100,59.16)};
+		
+\end{groupplot}
+\end{tikzpicture}
+\caption[]{Runtime means of instances \\2000-, 3000-, 4000-, 5000- and 6000-queens}
+\label{fig:results_nq}
+\end{figure}
+
+\subsection{Experiment design Nr. 2}
+
+\modified{The strategy of work sub-division proposed in the previews section} with \sgp{} seemed interesting to me and I did not want to give up on it. So I tried to apply it to \nqp. 
+
+\modified{In some experimental runs, I launched some {\it partial} solvers (i.e., solvers only performing permutations between variables into certain range)}, together with a {\it full} solver (i.e., a solver working with the entire configuration). I used the instance \textit{4000-queens} as test and I built the following solvers:
+\begin{enumerate}
+\item Solver $S_1$ only permuting the first 1000 variables
+\item Solver $S_2$ only permuting the first 2000 variables
+\item Solver $S_3$ only permuting the first 3000 variables
+\item Solver $S_4$ a {\it full} solver.
+\end{enumerate}
+
+\modified{Obviously, } the first three solvers were not able to find a solution to the problem, but at the beginning of runs, it was possible to observe that these solvers were able to obtain configurations with costs considerably lower with respect to the {\it full} solver $S_4$. For that reason I put in practice the idea of connecting {\it partial} solvers together with {\it full} solvers. This way, the search process can be accelerated at the beginning.
+
+\modified{Before designing} the solution strategy (\as) many experiments were launched to select: \begin{inparaenum} \item The number of sub-divisions of the configuration, i.e., how many {\it partial} solvers works in different sections of the configuration. They are connected to the {\it full} solver. \item The size of the section where the {\it partial} solvers work in. \end{inparaenum} 
+
+\modified{After many runs} of these experiments, it was decided to work with two {\it partial} sender solvers (implementing the \as{} in Algorithm~\ref{as:nq_ex6_sender}). In this algorithm $a$ and $b$ are parameters of the module $V_{[a,b]}$ used in the {\it partial} solvers. They represent the variables defining the range of the configuration where the {\it partial} solver works. They were chosen such that $b-a = \tfrac{n}{4}$ These solvers send their configurations to the {\it full} solver that implements the \as{} in Algorithm~\ref{as:nq_ex6_receiver}.
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_partial\_sender \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V_{[a,b]}, S, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}}{
+	\While{$\left(\textbf{\Iter < } K_1\right)$}{
+	$I \poslop{\mapsto}$
+		\whileinline{$\left(\textbf{\Iter \% } K_2 || \textbf{ \Sci < } K_3\right)$}{$\left[V_{[a,b]} \poslop{\mapsto} S \poslop{\mapsto} \left[\llparenthesis A \rrparenthesis^o \poslopcond{\Iter \% K_4} A\right]\right] $}
+	}	
+}
+\caption{\As{} for \NQP{} (partial solver sender)}\label{as:nq_ex6_sender}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{\tet{\bf abstract solver}}{\tet{\bf begin}}{\tet{\bf end}}
+\myproc{as\_full\_receiver \tcp*{{\sc Itr} $\rightarrow$ number of iterations}
+	\tet{\bf computation} : $I, V, S, A$\tcp*{{\sc Sci} $\rightarrow$ number of iterations with the same cost}
+	\tet{\bf communication} : $C.M.$\;}{%
+	$I \poslop{\mapsto}$\\
+		\While{$\left(\textbf{\Iter < } K_1\right)$}{$\left[ V \poslop{\mapsto} S \poslop{\mapsto} \left[A \poslopcond{\Iter \% K_2} \left[A \poslop{m} C.M. \right]\right] \right]$}	
+}
+\caption{\As{} for \NQP{} (full solver receiver)}\label{as:nq_ex6_receiver}
+\end{algorithm}
+
+\subsection{Results analysis of experiment Nr. 2}
+
+\modified{Results in Table~\ref{tab:nqueens_dic}} show that this strategy is effective to solve the \nqp{} improving the runtimes already obtained in the previews experiment. In the resolution of this problem, the improvement rate of the current configuration cost is very slow (yet stable). The \textit{partial} solvers work only on a section of the configuration, and for that reason, they are able to obtain configuration with costs considerably lower than the obtained by the {\it full} solver more quickly. This characteristic is taken into account: \textit{partial} solvers send their obtained configurations to the \textit{full} solvers. By doing this, the improvement rate of the current configuration can be accelerated at the beginning of the search.
+
+\begin{table}[h]
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{1.5cm}|R{1.5cm}R{1.5cm}R{1.5cm}R{1.5cm}}
+	\hline 
+	{\bf Instance} & T & T(sd) & It. & It.(sd) \\	
+	\hline
+	2000 & \good{\bf 5.11} & 0.83 & \good{\bf 841} & 37 \\
+	3000 & \good{\bf 11.55} & 1.96 & \good{\bf 1,275} & 67 \\
+	4000 & \good{\bf 21.27} & 3.76 & \good{\bf 1,656} & 108 \\
+	5000 & \good{\bf 34.77} & 4.99 & \good{\bf 2,082} & 108 \\
+	6000 & \good{\bf 51.72} & 5.73 & \good{\bf 2,501} & 176 \\	
+	\hline
+\end{tabular}
+\caption{Results for \NQP{} (40 cores, communication partial-full solvers)}\label{tab:nqueens_dic}
+\end{table}

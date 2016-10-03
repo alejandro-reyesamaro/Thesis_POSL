@@ -7,7 +7,7 @@
 \pagenumbering{roman}
 \input{TitlePage}
 \frontmatter
-\input{ShortAbstract}
+%\input{ShortAbstract}
 
 \cleardoublepage
 %\input{AppendedPapers}
@@ -15,31 +15,40 @@
 \cleardoublepage
 \dominitoc
 \tableofcontents
-\cleardoublepage
-\input{abstract}
-\cleardoublepage
-\input{Preface}
-\cleardoublepage
+%\cleardoublepage
+%\input{abstract}
+%\cleardoublepage
+%\input{Preface}
+%\cleardoublepage
 %\input{Dedication}
 
 \mainmatter
 
-\part{Description of Thesis}
+\part{Presentation}
 %\input{chapter_intro}
-\input{chapter_art}
-\input{chapter_prior}
-%\input{chap_PaperOverview}
-%\input{chap_outlook}
-%\input{chap_acknowledgements}
+%\input{chapter_art}
+%\input{chapter_prior}
+%\part{\posl{}: Parallel Oriented Solver Language}
+%\input{chap_posl}
+\part{Study and evaluation of \posl}
+\input{chap_res}
+%\input{chap_results}
+%\part{Conclusions and future works}
+%\input{chap_concl}
+%\input{chap_results}
 
 \footnotesize
-\bibliography{biblio201604}{} % Reference bib-library file
+\bibliography{biblio201608}{} % Reference bib-library file
 \bibliographystyle{unsrt}
 \normalsize
 
 %\appendix
-%\include{Appendix1}
 
-\part{Appended Papers}
+\part{Appendix}
+\include{appendix_res_graph_sgp}
+%\include{appendix_res_nqp}
+%\include{appendix_res_cap}
+%\include{appendix_res_grp}
+%\include{appendix_classdiag}
 %\input{papers}
 \end{document}

@@ -1,31 +1,22 @@
-\BOOKMARK [-1][-]{part.1}{I Description of Thesis}{}% 1
-\BOOKMARK [0][-]{chapter.1}{State of the art}{part.1}% 2
-\BOOKMARK [1][-]{section.1.1}{Combinatorial Optimization}{chapter.1}% 3
-\BOOKMARK [1][-]{section.1.2}{Constraint propagation}{chapter.1}% 4
-\BOOKMARK [1][-]{section.1.3}{Meta-heuristic methods}{chapter.1}% 5
-\BOOKMARK [2][-]{subsection.1.3.1}{Single Solution Based Meta-heuristic}{section.1.3}% 6
-\BOOKMARK [2][-]{subsection.1.3.2}{Population Based Meta-heuristic}{section.1.3}% 7
-\BOOKMARK [1][-]{section.1.4}{Hyper-heuristic Methods}{chapter.1}% 8
-\BOOKMARK [1][-]{section.1.5}{Hybridization}{chapter.1}% 9
-\BOOKMARK [1][-]{section.1.6}{Parallel computing}{chapter.1}% 10
-\BOOKMARK [1][-]{section.1.7}{Solvers cooperation}{chapter.1}% 11
-\BOOKMARK [1][-]{section.1.8}{Parameter setting techniques}{chapter.1}% 12
-\BOOKMARK [2][-]{subsection.1.8.1}{Off-line tunning}{section.1.8}% 13
-\BOOKMARK [2][-]{subsection.1.8.2}{On-line tunning}{section.1.8}% 14
-\BOOKMARK [0][-]{chapter.2}{Prior works leading to POSL}{part.1}% 15
-\BOOKMARK [1][-]{section.2.1}{Relaxation model for discrete CSPs}{chapter.2}% 16
-\BOOKMARK [1][-]{section.2.2}{Domain Split}{chapter.2}% 17
-\BOOKMARK [2][-]{subsection.2.2.1}{Domain Splitting. General point of view}{section.2.2}% 18
-\BOOKMARK [2][-]{subsection.2.2.2}{Split strategies}{section.2.2}% 19
-\BOOKMARK [2][-]{subsection.2.2.3}{Conclusion}{section.2.2}% 20
-\BOOKMARK [1][-]{section.2.3}{Tunning methods for local search algorithms}{chapter.2}% 21
-\BOOKMARK [2][-]{subsection.2.3.1}{ParamILS\1372.3}{section.2.3}% 22
-\BOOKMARK [2][-]{subsection.2.3.2}{Using ParamILS}{section.2.3}% 23
-\BOOKMARK [2][-]{subsection.2.3.3}{Tuning scenario files}{section.2.3}% 24
-\BOOKMARK [2][-]{subsection.2.3.4}{Building the wrapper}{section.2.3}% 25
-\BOOKMARK [2][-]{subsection.2.3.5}{Using the wrapper}{section.2.3}% 26
-\BOOKMARK [2][-]{subsection.2.3.6}{Results}{section.2.3}% 27
-\BOOKMARK [2][-]{subsection.2.3.7}{Tuning comparison}{section.2.3}% 28
-\BOOKMARK [2][-]{subsection.2.3.8}{Conclusion}{section.2.3}% 29
-\BOOKMARK [0][-]{chapter.3}{Bibliography}{part.1}% 30
-\BOOKMARK [-1][-]{part.2}{II Appended Papers}{}% 31
+\BOOKMARK [-1][-]{part.1}{I Presentation}{}% 1
+\BOOKMARK [-1][-]{part.2}{II Study and evaluation of POSL}{}% 2
+\BOOKMARK [0][-]{chapter.1}{Experiments design and results}{part.2}% 3
+\BOOKMARK [1][-]{section.1.1}{Solving the Social Golfers Problem}{chapter.1}% 4
+\BOOKMARK [2][-]{subsection.1.1.1}{Problem definition}{section.1.1}% 5
+\BOOKMARK [2][-]{subsection.1.1.2}{Experiment design and results}{section.1.1}% 6
+\BOOKMARK [1][-]{section.1.2}{Solving the N-Queens Problem}{chapter.1}% 7
+\BOOKMARK [2][-]{subsection.1.2.1}{Problem definition}{section.1.2}% 8
+\BOOKMARK [2][-]{subsection.1.2.2}{Experiment design Nr. 1}{section.1.2}% 9
+\BOOKMARK [2][-]{subsection.1.2.3}{Results analysis of experiment Nr. 1}{section.1.2}% 10
+\BOOKMARK [2][-]{subsection.1.2.4}{Experiment design Nr. 2}{section.1.2}% 11
+\BOOKMARK [2][-]{subsection.1.2.5}{Results analysis of experiment Nr. 2}{section.1.2}% 12
+\BOOKMARK [1][-]{section.1.3}{Solving the Costas Array Problem}{chapter.1}% 13
+\BOOKMARK [2][-]{subsection.1.3.1}{Problem definition}{section.1.3}% 14
+\BOOKMARK [2][-]{subsection.1.3.2}{Experiment design and results}{section.1.3}% 15
+\BOOKMARK [1][-]{section.1.4}{Solving the Golomb Ruler Problem}{chapter.1}% 16
+\BOOKMARK [2][-]{subsection.1.4.1}{Problem definition}{section.1.4}% 17
+\BOOKMARK [2][-]{subsection.1.4.2}{Experiment design and results}{section.1.4}% 18
+\BOOKMARK [1][-]{section.1.5}{Summarizing}{chapter.1}% 19
+\BOOKMARK [0][-]{chapter.2}{Bibliography}{part.2}% 20
+\BOOKMARK [-1][-]{part.3}{III Appendix}{}% 21
+\BOOKMARK [0][-]{chapter.3}{Results of experiments with Social Golfers Problem}{part.3}% 22

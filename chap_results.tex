@@ -1,0 +1,321 @@
+%----------------------------------------------------------------------------------------------
+%------ RESULTS
+%----------------------------------------------------------------------------------------------
+\chapter{Analysis of results}
+\label{chap:res}
+\textit{In this chapter we explain the used environments were we run the experiments (description of my desktop machine, \textit{Curiosiphi} server, and eventually \textit{Grid5000}). We describe all the experiments and we expose a complete analysis of the obtained result.}
+\vfill
+\minitoc
+\newpage
+
+The experiments\footnote{\posl{} source code is available on GitHub:\href{https://github.com/alejandro-reyesamaro/POSL}{https://github.com/alejandro-reyesamaro/POSL}} 
+were performed on an Intel\R{} Xeon\TM{} E5-2680 v2, 10$\times$4 cores, 2.80GHz. Results showed in this section are the means of 30 runs for each setup, presented in columns labeled {\bf T}, corresponding to the run-time in seconds, and {\bf It.} corresponding to the number of iterations; and their respective standard deviations ({\bf T(sd)} and {\bf It.(sd)}). In some tables, the column labeled \textbf{\% success} indicates the percentage of solvers finding a solution before reaching a time--out (5 minutes).
+
+\modified{The experiments in this section are multi-walk runs using the same solver main structure (except differents w.r.t. communication operations). Parallel experiments use 40 cores for all problem instances.  It is important to point out that \posl{} is not designed to obtain the best results in terms of performance, but to give the possibility of rapidly prototyping and studying different cooperative or non cooperative search strategies.}
+
+\section{\sgp}
+
+We present in Table~\ref{tab:golfers_seq} results of launching \textit{solvers sets} to solve each instance of the problem sequentially. Not surprisingly, the means of sequential runtimes and iterations (Table~\ref{tab:golfers_seq}) are bigger than those means of parallel runs, with or without communication (all
+other tables). 
+%This confirms the intuition that parallel approach increases the probability of finding the solution within a more reasonable time (some tens of seconds), than with the sequential scheme \cite{Alon2011}. 
+%The column labeled \textbf{\% success} in Table~\ref{tab:golfers_seq} indicates the percentage of solvers finding a solution before reaching a time--out (5 minutes). 
+%presented in Table~\ref{tab:golfersB001}, column \textit{O.M. First Improvement} (without communication), and results with communication (Tables~\ref{tab:golfersB001comm100}, \ref{tab:golfersB001comm50} and \ref{tab:golfersB001comm25}). 
+
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{1.5cm}|R{1.5cm}R{1.5cm}R{1.5cm}R{1.5cm}R{2.5cm}}
+\hline
+{\bf Instance} & T & T(sd) & It. & It.(sd) & \% success\\
+\hline
+%\hline
+5--3--7 & 8.31 & 7.64 & 17,347 & 15,673 & 100.00\\
+8--4--7 & 16.92 & 15.15 & 7,829 & 7,019 & 100.00\\
+9--4--8 & 79.60 & 64.07 & 20,779 & 16,537 & 94.28\\
+11--7--5 & 3.37 & 2.16 & 664 & 380 & 100.00\\
+\hline
+\end{tabular}
+\caption{\sg: a single sequential solver}
+\label{tab:golfers_seq}
+\end{table}
+
+In a first stage of the experiments we use the operator-based language provided by \posl{} to build and test many different non communicating strategies. The goal is to select the best concrete modules to run tests performing communication. In particular, we have tested two kind of computation modules: the one computing the neighborhood of a given configuration and the one choosing the current configuration for the next solver iteration.
+
+We focused on choosing the right neighborhood function. In the case of the \sgp, this experiment was launched using a basic abstract solver showed in Algorithm~\ref{as:golfers10-10-3}.
+%\footnote{\label{note:app3} Supplementary document {\it App[06-2016].pdf} (\href{https://goo.gl/W6W5VM}{https://goo.gl/W6W5VM})} 
+Solvers implemented from this abstract solver was not able to solve instances beyond three weeks: they were very often trapped into local minima. This is the reason why we perform this first experiment with the instance 10--10--3 whereas next experiments scale above 3 weeks. This was not a problem though, since the goal of this first experiment was only to find the right concrete neighborhood module.
+
+\begin{table}
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{4cm}|R{1.3cm}R{1.3cm}R{1.3cm}R{1.3cm}}
+\hline
+{\bf Abstract solvers} & T & T(sd) & It. & It.(sd) \\
+\hline
+%\hline
+Adaptive Search (AS) & \good{\bf 1.06} & 0.79 & 352 & 268 \\		
+Std $\circled{$\rho$}$ AS & 41.53 & 26.00 & 147 & 72\\
+Std $\circled{$\cup$}$ AS & 59.65 & 55.01 & 198 & 110\\
+Standard (Std) & 87.90 & 41.96 & 146 & 58 \\
+\hline
+\end{tabular}
+\caption{\sg: Instance 10--10--3 in parallel}
+\label{tab:golfers10-10-3}
+\end{table}
+
+Results in Table~\ref{tab:golfers10-10-3} are not surprising. The neighborhood neighborhood module $V_{AS}$ is based on the {\it Adaptive Search} algorithm, which has shown very good results \cite{Diaz}. %It selects the variable (player) contributing the most to the cost and permutes its value with the others variables (players) for all groups, every week.
+It selects the most culprit variable (i.e. a player), that is, the variable to most responsible for constraints violation. Then, it permutes this variable value with the value of each other variable, in all groups and all weeks. Each permutation gives a neighbor of the current configuration. $V_{Std}$ uses no additional information, so it performs every possible swap between two players in different groups, every week. It means that this neighborhood is $g\times p$ times bigger than the previous one, with $g$ the number of groups and $p$ the number of players per group. We also tested abstract solvers with different combinations of these modules, using the $\circled{$\rho$}$ and the $\circled{$\cup$}$ operators. The $\circled{$\rho$}$ operator executes its first or second parameter depending on a given probability $\rho$, and the $\circled{$\cup$}$ operator returns the union of its parameters output. All these combinations spent more time searching the best configuration among the neighborhood, although with a lower number of iterations than $V_{AS}$. The $V_{AS}$ neighborhood function being clearly faster, we have chosen it for our experiments, even if it shown a more spread standard deviation: 0.75 for AS versus 0.62 for Std, considering the ratio $\tfrac{T(sd)}{T}$.
+
+%It allows for more organized search because the set of neighbors is pseudo-deterministic, i.e., the construction criteria is always the same but the order of the configuration is random. On the other hand, {\it Adaptive Search} neighborhood function takes random decisions more frequently, and the order of the configurations is random as well. The AS neighborhood function being clearly faster, we selected it for our experiments. The combination using the operator $\circled{$\rho$}$ executes one or the other, depending on the probability $\rho$, and the combination using the operator $\circled{$\cup$}$ is the union of these neighborhoods. 
+
+\begin{table}
+\captionsetup{belowskip=6pt,aboveskip=6pt}
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}}
+	\hline %\noalign{\smallskip}	
+	\multirow{2}{*}{\footnotesize{\centering {\bf Instance}}} & 
+	\multicolumn{4}{c|}{O.M. Best Improvement} & 
+	\multicolumn{4}{c}{O.M. First Improvement}\\
+	\cline{2-9} %\cline{3-8}
+	& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) \\
+	\hline
+	%\hline
+	5--3--7 & 4.99 & 4.43 & 4,421 & 3,938 & \good{\bf 1.32} & 0.68 & 1322 & 676\\
+	8--4--7 & 5.10 & 1.77 & 954 & 334 & \good{\bf 1.82} & 0.84 & 445 & 191\\	
+	9--4--8 & 12.37 & 5.40 & 1,342 & 591 & \good{\bf 6.43} & 4.60 & 873 & 591 \\
+	11--7--5 & 5.19 & 1.67 & 351 & 114 & \good{\bf 2.22} & 0.69 & 273 & 58\\
+	\hline
+\end{tabular}
+\caption{\sg: comparing selection functions}
+\label{tab:golfersB001}
+\end{table}
+
+With the selected neighborhood function, we focused on choosing the best {\it selection} function. We compared two different concrete modules used within the abstract solver in Algorithm~\ref{as:golfers_b001}, which combines selection modules ($S_{First}$ or $S_{Best}$) with $S_{Rand}$, to avoid being trapped into local minima: it tries to improve the cost in a limited number of iterations. If it is not possible, it selects a random neighbor for the next iteration. The first module was $S_{Best}$ that selects the best configuration inside the neighborhood. It not only spent more time searching a better configuration, but also is more sensitive to become trapped into local minima. The second module was $S_{First}$ which selects the first configuration inside the neighborhood improving the current cost. Using this module, solvers favor exploration over intensification and of course spend clearly less time computing the neighborhood. Table~\ref{tab:golfersB001} presents results of this experiment, showing that an exploration-oriented strategy is better for the {\it Social Golfers} problem. If we compare results of Tables~\ref{tab:golfers_seq} and \ref{tab:golfersB001} with respect to the standard deviation, we can some gains in robustness with parallelism. The spread in the running times and iterations for the instance 9--4--8 (the hardest one) is 10\% lower (0.80 sequentially versus 0.71 in parallel), and for the others, it is around 40\% lower (0.91, 0.89 and 0.64 sequentially versus 0.51, 0.45 and 0.31 in parallel, for 5--3--7, 8--4--7 and 11--7--5 respectively, with the same ratio $\tfrac{T(sd)}{T}$).
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+		\begin{tabular}{p{2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}}
+			\hline 	
+			\multirow{2}{*}{\centering {\bf Instance}} & \multicolumn{4}{c}{Communication 1 to 1} & \multicolumn{4}{c}{Communication 1 to N}\\
+			\cline{2-9}
+			& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) \\
+			\hline
+			%\hline
+			5--3--7 & 1.19 & 0.64 & 1,156 & 608 & 1.11 & 0.49 & 1,067 & 484\\
+			8--4--7 & \good{1.30} & 0.72 & \good{317} & 161 & 1.46 & 0.57 & 347 & 128\\
+			9--4--8 & 4.38 & 2.72 & \good{597} & 347 & 5.51 & 3.06 & 736 & 389\\
+			11--7--5 & 1.76 & 0.41 & 214 & 44 & \good{1.62} & 0.34 & \good{202} & 30\\
+			\hline
+		\end{tabular}
+	\caption{\sg: test with 100\% of communication}
+	\label{tab:golfersB001comm100}
+\end{table}
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+		\begin{tabular}{p{2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}}
+			\hline 	
+			\multirow{2}{*}{\centering {\bf Instance}} & \multicolumn{4}{c}{Communication 1 to 1} & \multicolumn{4}{c}{Communication 1 to N}\\
+			\cline{2-9}
+			& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) \\
+			\hline
+			%\hline
+			5--3--7 & 1.04 & 0.45 & 1,019 & 456 & 1.04 & 0.53 & 1,031 & 530\\
+			8--4--7 & 1.40 & 0.57 & 337 & 122 & 1.43 & 0.76 & 353 & 167\\
+			9--4--8 & 4.64 & 2.17 & 637 & 279 & 5.75 & 3.06 & 776 & 389 \\
+			11--7--5 & 1.81 & 0.40 & 220 & 33 & 1.82 & 0.39 & 222 & 39\\
+			\hline
+		\end{tabular}
+	\caption{\sg: test with 50 \% of communication}
+	\label{tab:golfersB001comm50}
+\end{table}
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+		\begin{tabular}{p{2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}}
+			\hline 	
+			\multirow{2}{*}{\centering {\bf Instance}} & \multicolumn{4}{c}{Communication 1 to 1} & \multicolumn{4}{c}{Communication 1 to N}\\
+			\cline{2-9}
+			& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd) \\
+			\hline
+			%\hline
+			5--3--7 & \good{0.90} & 0.51 & \good{881} & 492 & 1.19 & 0.67 & 1,170 & 655\\
+			8--4--7 & 1.39 & 0.43 & 341 & 94 & 1.46 & 0.43 & 352 & 96\\
+			9--4--8 & \good{4.33} & 1.92 & 599 & 248 & 4.53 & 2.01 & 625 & 251\\
+			11--7--5 & 1.99 & 0.54 & 242 & 51 & 1.63 & 0.35 & 224 & 28 \\
+			\hline
+		\end{tabular}
+	\caption{\sg: test with 25\% of communication}
+	\label{tab:golfersB001comm25}
+\end{table}
+
+\modified{Then we ran experiments to study \posl's behavior solving target problems in communicating scenarios. Some compositions of solvers set were taken into account:}
+\begin{inparaenum}[i.]
+	\item the structure of the communication (with/without communication or a mix), and
+	\item \modified{the used communication operator}.
+\end{inparaenum}
+
+Each time a \posl{} meta-solver is launched, many independent search solvers are executed. We call "good" configuration a configuration with the lowest cost within the current configuration neighborhood and with a cost strictly lesser than the current one. Once a good configuration is found in a sender solver, it is transmitted to the receiver one. At this moment, if the information is accepted, there are some solvers searching in the same subset of the search space, and the search process becomes more exploitation--oriented. This can be problematic if this process makes solvers converging too often towards local minima. In that case, we waste more than one solver trapped into a local minima: we waste all solvers that have been attracted to this part of the search space because of communications. We avoid this phenomenon through a simple (but effective) play: if a solver is not able to find a better configuration inside the neighborhood (executing $S_{First}$), it selects a random one at the next iteration (executing $S_{Rand}$). This strategy, using communication between solvers, produces some gain in terms of runtime (Table~\ref{tab:golfersB001} w.r.t. Tables~\ref{tab:golfersB001comm100}, \ref{tab:golfersB001comm50} and \ref{tab:golfersB001comm25}. The percentage of the receiver solvers that were able to find the solution before the others did, was significant \tet{See Anexes}. %(see tables in the supplementary documents)\footnote{\label{note:results} Supplementary document {\it Experiments[06-2016].ods}\\ (\href{https://goo.gl/QXAJeP}{https://goo.gl/rLqxuo})}. 
+That shows that the communication played an important role during the search, despite inter--process communication's overheads (reception, information interpretation, making decisions, etc). For this problem we have reduced the spread in the running times and iterations of the results for the two last instances (9--4--8 and 11--7--5) applying the communication strategy (0.71 without communication versus 0.44 with communication, for 9--4--8, and 0.31 without communication versus 0.20 with communication for 11--7--5). %Having many solvers searching in different places of the search space, the probability that one of them reaches a promising place is higher. Then, when a solver finds a good configuration, it can be communicated, and receiving the help of one or more solvers in order to find the solution.
+
+\section{\nqp}
+
+\input{sect_res_nq}
+
+%----------------------------------------
+%----- COSTAS
+%---------------------------------------
+\section{\carrp}
+
+\modified{We present in Table~\ref{tab:costas17} results of launching {\it solver sets} to solve each instance of \carrp{} sequentially. Runtimes and iteration means showed in this Table are bigger than those presented in Table~\ref{tab:costas17comm}, confirming once again the success of the parallel approach.} %The column labeled \textbf{\% success} indicates the percentage of solvers that were able to find a solution before a time--out (5 minutes).
+
+\begin{table}[h]
+\captionsetup{belowskip=6pt,aboveskip=6pt}
+\centering
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{3.5cm}|R{1cm}R{1cm}R{1.2cm}R{1.2cm}R{2cm}}
+	\hline
+	{\bf STRATEGY} & T & T(ds) & It. & It.(sd) & \% success\\
+	\hline
+	%\hline
+	Sequential (1 core) & 2.12 & 0.87 & 44,453 & 18,113 & 42.00\\
+	Parallel (40 cores) & 0.73 & 0.46 & 9,556 & 6,439 & 100.00\\
+	\hline
+\end{tabular}
+\caption{\carr{} 17: no communication}
+\label{tab:costas17}
+\end{table}
+
+\modified{We chose directly the neighborhood module ($V_{AS}$), the selection module ($S_{First}$) and the acceptance module $A$, to create the solvers. We ran experiments to study parallel communicating strategies taken into account the structure of the communication, and the communication operator used, but in this problem, we perform the communication at two different times: at the time of applying the acceptance criteria, and at the time of performing the {\it reset}.}
+
+\begin{table}
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{2.5cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}|R{1cm}R{1cm}R{1cm}R{1.2cm}}
+	\hline
+	\multirow{3}{*}{\footnotesize{\centering {\bf STRATEGY}}} & \multicolumn{4}{c}{100\% COMM} & \multicolumn{4}{c}{50\% COMM} \\
+	\cline{2-9}
+	& T & T(sd) & It. & It.(sd) & T & T(sd) & It. & It.(sd)\\
+	\hline
+	Str A: 1 to 1 & \good{0.41} & 0.30 & 4,973 & 3,763 & 0.55 & 0.43 & 8,179 & 7,479\\
+	Str A: 1 to N & 0.43 & 0.31 & 5,697 & 4,557 & 0.57 & 0.46 & 8,420 & 7,564\\	
+	Str B: 1 to 1 & 0.48 & 0.41 & 6,546 & 5,562 & 0.51 & 0.49 & 8,004 & 7,998\\
+	Str B: 1 to N & 0.45 & 0.46 & 5,701 & 6,295 & 0.48 & 0.51 & 7,245 & 8,379\\
+	Str C: 1 to 1 & 0.48 & 0.43 & 6,954 & 6,706 & 0.58 & 0.43 & 8,329 & 6,593\\
+	Str C: 1 to N & 0.49 & 0.38 & 6,457 & 5,875 & 0.58 & 0.50 & 8,077 & 8,319\\
+	\hline
+\end{tabular}
+\caption{\carr{} 17: with communication}
+\label{tab:costas17comm}
+\end{table}
+
+\modified{Table~\ref{tab:costas17comm} shows that the \as{} {\it A} (receiving the configuration at the time of applying the acceptance criteria) is more effective. The reason is that the others, interfere with the proper performance of the {\it reset}.} Table~\ref{tab:costas17comm} shows also high values of standard deviation. This is not surprising, due to the highly random nature of the neighborhood function and the selecting criterion, as well as the execution of many resets during the search process.
+
+\section{\grp}
+
+\modified{The benefit of the parallel approach is also proved for the \grp{} (see Table~\ref{tab:golomb_sec} w.r.t. \ref{tab:golomb_par_notabu}, \ref{tab:golomb_par_tabu}, \ref{tab:golomb_par_1-1} and \ref{tab:golomb_par_1-n}).} %The column labeled {\bf \%success} indicates the percentage of solvers that were able to find a solution before a time--out (5 minutes).
+
+\modified{For \grp, the communication strategy that we adopt was different. Solvers do not communicate the current configuration to have more solvers searching in its neighborhood, but a configuration that we assume is a local minimum to be avoided. We consider that the current configuration is a local minimum since the solver (after a given number of iteration) is not able to find a better configuration in its neighborhood.}
+
+\modified{The first experiment compares the runs of non communitaing solvers not using a {\it tabu} list with non communicating solvers using a {\it tabu} list. The results in Tables~\ref{tab:golomb_par_notabu} and \ref{tab:golomb_par_tabu} demonstrate that using a {\it tabu} list can help the search process. Without communication, the improvement is not substantial (8\% for 8--34, 7\% for 10--55 and 5\% for 11--72) because only one configuration is inserted in the \textit{tabu} list after each restart. \modified{When we use \textit{one to one} communication, after the restart $k$, the receiving solver has twice the number of configurations in the \textit{tabu} list (one {\it tabu} configuration from itself and the received one after each restart).} Table~\ref{tab:golomb_par_1-1} shows that this strategy is not sufficient for some instances, but when we use \textit{one to N} communication, the number of \textit{tabu} configurations after the restart $k$, in the receiving solver is considerably higher, e.g., after the restart $k$ a receiving solver has $k(N+1)$ configurations in his \textit{tabu} list. Hence, these solvers can generate configurations far enough from many potentially local minima. This phenomenon is more visible when the problem order increases. Table~\ref{tab:golomb_par_1-n} shows that the improvement for the higher case (11-72) is about 32\% w.r.t non communicating solvers not using a {\it tabu} list (Table~\ref{tab:golomb_par_notabu}), and about 29\% w.r.t non communicating solvers using a {\it tabu} list (Table~\ref{tab:golomb_par_tabu}).}
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+		\begin{tabular}{p{2cm}|R{1.2cm}R{1.2cm}|R{1.5cm}R{1.5cm}|R{0.8cm}R{1.2cm}|R{1.5cm}}
+			\hline 	
+			{\bf Instance} & T & T(sd) & It. & It.(sd) & R & R(sd) & \% success\\
+			\hline
+			%\hline
+			8--34 & 0.79 & 0.66 & 13,306 & 11,154 & 66 & 55.74 & 100.00\\
+			8--34 (t) & 0.66 & 0.63 & 10,745 & 10,259 & 53 & 51.35 & 100.00 \\
+			10--55 & 66.44 & 49.56 & 451,419 & 336,858 & 301 & 224.56 & 80.00\\			
+			10--55 (t) & 67.89 & 50.02 & 446,913 & 328,912 & 297 & 219.30 & 88.00\\
+			11--72 & 160.34 & 96.11 & 431,623 & 272,910 & 143 & 90.91 & 26.67\\
+			11--72 (t) & 117.49 & 85.62 & 382,617 & 275,747 & 127 & 91.85 & 30.00\\
+			\hline
+		\end{tabular}
+	\caption{\gr: a single sequential solver}
+	\label{tab:golomb_sec}
+\end{table}
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+	\begin{tabular}{p{2cm}|R{1.2cm}R{1.2cm}|R{1.5cm}R{1.5cm}|R{0.8cm}R{1.2cm}}
+		\hline 	
+		{\bf Instance} & T & T(sd) & It. & It.(sd) & R & R(sd)\\
+		\hline
+		%\hline
+		8--34 & 0.47 & 34.82 & 436 & 330.10 & 2 & 1.63\\
+		10--55 & 5.31 & 38.63 & 22,577 & 16,488 & 15 & 11.00\\
+		11--72 & 89.76 & 55.85 & 164,763 & 102,931 & 54 & 34.32\\
+		\hline
+	\end{tabular}
+	\caption{\gr: parallel, without tabu list.}
+	\label{tab:golomb_par_notabu}
+\end{table}
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+	\begin{tabular}{p{2cm}|R{1.2cm}R{1.2cm}|R{1.5cm}R{1.5cm}|R{0.8cm}R{1.2cm}}
+		\hline 	
+		{\bf Instance} & T & T(sd) & It. & It.(sd) & R & R(sd)\\
+		\hline
+		%\hline
+		8--34 & 0.43 & 0.37 & 349 & 334 & 1 & 1.64\\
+		10--55 & 4.92 & 4.68 & 20,504 & 19,742 & 13 & 13.07\\
+		11--72 & 85.02 & 67.22 & 155,251 & 121,928 & 51 & 40.64\\
+		\hline
+	\end{tabular}
+	\caption{\gr: parallel, with tabu list.}
+	\label{tab:golomb_par_tabu}
+\end{table}
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+	\begin{tabular}{p{2cm}|R{1.2cm}R{1.2cm}|R{1.5cm}R{1.5cm}|R{0.8cm}R{1.2cm}}
+		\hline 	
+		{\bf Instance} & T & T(sd) & It. & It.(sd) & R & R(sd)\\
+		\hline
+		%\hline
+		8--34 & 0.44 & 0.31 & 309 & 233 & 1 & 1.23\\
+		10--55 & 3.90 & 3.22 & 15,437 & 12,788 & 10 & 8.52\\
+		11--72 & 85.43 & 52.60 & 156,211 & 97,329 & 52 & 32.43\\
+		\hline
+	\end{tabular}
+	\caption{\gr: parallel, communication 1 to 1.}
+	\label{tab:golomb_par_1-1}
+\end{table}
+
+\begin{table}
+	\captionsetup{belowskip=6pt,aboveskip=6pt}
+	\centering 
+	\renewcommand{\arraystretch}{1}
+	\begin{tabular}{p{2cm}|R{1.2cm}R{1.2cm}|R{1.5cm}R{1.5cm}|R{0.8cm}R{1.2cm}}
+		\hline 	
+		{\bf Instance} & T & T(sd) & It. & It.(sd) & R & R(sd)\\
+		\hline
+		%\hline
+		8--34 & 0.43 & 0.29 & 283 & 225 & 1 & 1.03\\
+		10--55 & 3.16 & 2.82 & 12,605 & 11,405 & 8 & 7.61\\
+		11--72 & 60.35 & 43.95 & 110,311 & 81,295 & 36 & 27.06\\
+		\hline
+	\end{tabular}
+	\caption{\gr: parallel, communication 1 to n.}
+	\label{tab:golomb_par_1-n}
+\end{table}

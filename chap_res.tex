@@ -1,0 +1,115 @@
+\chapter{Experiments design and results}
+\label{chap:expe}
+\textit{In this Chapter I expose all details about the evaluation process of \posl{}, i.e., all experiments I perform. For each benchmark, I explain used strategies in the evaluation process and the used environments were the runs were performed (\textit{Curiosiphi} server). %, and eventually \textit{Grid5000}). 
+I describe all the experiments and I expose a complete analysis of the obtained result.}
+\vfill
+\minitoc
+\newpage
+
+In this chapter I illustrate and analyze the versatility of \posl{} studying different ways to solve constraint problems based on local search meta-heuristics. 
+I have chosen the \sgp, the \nqp, the \carrp{} and the \grp{} as benchmarks since they are challenging yet differently structured problems. In this Chapter I present formally each benchmark, I explain the structure of \posl's solvers that I have generated for experiments and present a detailed analysis of obtained results.
+
+The experiments\footnote{\posl{} source code is available on GitHub:\href{https://github.com/alejandro-reyesamaro/POSL}{https://github.com/alejandro-reyesamaro/POSL}} 
+were performed on an Intel\R{} Xeon\TM{} E5-2680 v2, 10$\times$4 cores, 2.80GHz. This server is called \textit{Coriosiphi} and is located at \textit{Laboratoire d'Informatique de Nantes Atlantique}, at the University of Nantes. Showed results are the means of 30 runs for each setup, presented in columns labeled {\bf T}, corresponding to the run-time in seconds, and {\bf It.} corresponding to the number of iterations; and their respective standard deviations ({\bf T(sd)} and {\bf It.(sd)}). In some tables, the column labeled \textbf{\% success} indicates the percentage of solvers finding a solution before reaching a time--out (5 minutes).
+
+\modified{The experiments in this Chapter are multi-walk runs}. Parallel experiments use 40 cores for all problem instances. It is important to point out that \posl{} is not designed to obtain the best results in terms of performance, but to give the possibility of rapidly prototyping and studying different cooperative or non cooperative search strategies.
+
+\modified{All benchmarks were coded using the \posl{} low-level framework in C++.}
+
+\modified{First results using \posl{} to solve} constraint problems were published in \cite{Reyes-amaro} were we used \posl{} to solve the \sgp{} and study some communication strategies. It was the first version of \posl{}, therefore it was able to solve only relatively easy instances. However, the efficacy of the communication was showed using this tool.
+
+\modified{With the next and more optimized version of \posl{}, I decide to start to perform more detailed studies using the benchmark mentioned before and some others.}
+
+\section{Solving the \sgp}
+\label{sec:golfers}
+
+\input{res_golfers}
+
+\section{Solving the \nqp}
+\label{sec:nqueens}
+
+\input{res_nqueens}
+
+\section{Solving the \carrp}
+\label{sec:costas}
+
+\input{res_costas}
+
+\section{Solving the \grp}
+\label{sec:golomb}
+
+\input{res_golomb}
+
+\section{Summarizing}
+
+In this Chapter I have chosen various \CSPs{} as benchmarks to \begin{inparaenum}[1.] \item evaluate the \posl{} behavior solving these kind of problems, and \item to study different solution strategies, specially communication strategies.\end{inparaenum} To this end, I have chosen benchmarks with different characteristics, to help me having a wide view of the \posl{} behavior.
+
+In the solution process of \sgp{}, it was that an exploitation-oriented communication strategy, in which the current configuration is communicated to ask other solvers for help to concentrate the effort in a more promising area, can provide some gain in terms of runtime. It was also presented results showing the success of a cost descending acceleration communication strategy, exchanging the current configuration between two solvers with different characteristics. Some other unsuccessful strategies were studied, showing that the sub-division of the effort by weeks, do not work well. Table~\ref{tab:golfers_summarize} summarizes the obtained results solving \SGP. 
+
+It was showed that simple communication strategies as they were applied to solve \sgp{} does not improve enough the results without communication for the \nqp{}. However, a deep study of the \posl's behavior during the search process allows to design a communication strategy able to improve the results obtained using non-communicating strategies.
+
+The \carrp{} is a very complicated constrained problem, and very sensitive to the methods to solve it. For that reason I used some ideas from already existent algorithms. However, thanks to some studies of different communication strategies, based on the configuration of the current communication at different times (places) in the algorithm, it was possible to find a communication strategy to improve the performance. Table~\ref{tab:costas_summarize} summarizes the obtained results solving \CARRP. 
+
+During the solution process of the \grp{}, \posl{} needs to perform many restarts. For that reason, this problem was chosen to study a different (and innovative up tu my knowledge) communication strategy, in which the communicated information is a potential local minimum to be avoided. This new communication strategy showed to be effective to solve these kind of problems. Table~\ref{tab:golomb_summarize} summarizes the obtained results solving \GRP.
+
+In all cases, thanks to the operator-based language provided by \posl{} it was possible to test many different strategies (communicating and non-communicating) fast and easily. Whereas creating solvers implementing different solution strategies can be complex and tedious, \posl{} gives the possibility to make communicating and non-communicating solver prototypes and to evaluate them with few efforts. In this Chapter it was possible to show that a good selection and management of inter-solvers communication can largely help to the search process, working with complex constrained problems.
+
+\begin{table}
+\captionsetup{belowskip=6pt,aboveskip=6pt}
+\centering 
+\renewcommand{\arraystretch}{1}
+\begin{tabular}{p{1.7cm}|R{0.8cm}R{1cm}|R{0.8cm}R{1cm}|R{0.8cm}R{1cm}}
+	\hline 	
+	\multirow{2}{*}{\centering {\bf Instance}} & \multicolumn{2}{c|}{\bf Sequential} & \multicolumn{2}{c|}{\bf Parallel} & \multicolumn{2}{c}{\bf Cooperation}\\
+	\cline{2-7}
+	& T & It. & T & It. & T & It. \\
+	\hline
+	5--3--7 & 1.25 & 2,907 & 0.23 & 142 & \good{0.08} & 139 \\
+	8--4--7 & 0.60 & 338 & 0.28 & 93 & \good{0.14} & 100 \\
+	9--4--8 & 1.04 & 346 & 0.60 & 139 & \good{0.36} & 144 \\
+	\hline
+\end{tabular}
+\caption{Summarizing results for \SGP}
+\label{tab:golfers_summarize}
+\end{table}
+
+\begin{table}
+\captionsetup{belowskip=6pt,aboveskip=6pt}
+\centering
+\renewcommand{\arraystretch}{1}
+%\resizebox{0.9\columnwidth}{!}{%
+\begin{tabular}{p{3.5cm}|R{1.2cm}R{1.7cm}R{1.7cm}}
+	\hline
+	{\bf STRATEGY} & T & It. & \% success\\
+	\hline
+	%\hline
+	Sequential  & 132.73 & 2,332,088 & 40.00\\
+	Parallel & 25.51 & 231,262 & 100.00\\
+	Cooperative Strategy & \good{10.83} & 79,551 & 100.00\\
+	\hline
+\end{tabular}
+%}
+\caption{Summarizing results for \CARRP{} 19}
+\label{tab:costas_summarize}
+\end{table}
+
+\begin{table}
+\captionsetup{belowskip=6pt,aboveskip=6pt}
+\centering 
+\renewcommand{\arraystretch}{1}
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{p{1.5cm}|R{1.1cm}R{1.3cm}R{0.6cm}R{1.7cm}|R{0.9cm}R{1.3cm}R{0.6cm}|R{1.1cm}R{1.3cm}R{0.6cm}}
+\hline 	
+{\bf Instance} & \multicolumn{4}{c|}{\textbf{Sequential}} & \multicolumn{3}{c|}{\textbf{Parallel}} & \multicolumn{3}{c}{\textbf{Cooperation}}\\
+\cline{2-11}
+& T & It. & R & \% success & T & It. & R & T & It. & R\\
+\hline
+8--34 & 0.66 & 10,745 & 53 & 100.00 & 0.43 & 349 & 1 & \good{0.43} & 283 & 1\\
+10--55 & 67.89 & 446,913 & 297 & 88.00 & 4.92 & 20,504 & 13 & \good{3.16} & 12,605 & 8\\
+11--72 & 117.49 & 382,617 & 127 & 30.00 & 85.02 & 155,251 & 51 & \good{60.35} & 110,311 & 36\\
+\hline
+\end{tabular}
+}
+\caption{Summarizing results for \GRP{}}
+\label{tab:golomb_summarize}
+\end{table}

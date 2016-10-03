@@ -1,0 +1,36 @@
+\chapter{Results of experiments with \sgp}
+\label{app:sgp}
+\textit{This Appendix, presents graphically a summary of individuals runs using \sgp. Figures show a \textit{box-plot} representation, indicating also, for each experiment, the percentage of communicating solvers finding the solution thanks to received information.}
+\vfill
+\newpage
+
+%\begin{itemize}
+%\item \textbf{\sender{BLUE}}: Sender solver.
+%\item \textbf{\receiver{RED}}: Receiver solver.
+%\item \textbf{\nonreceiver{ORANGE}}: Receiver solver without taking into consideration the received information.
+%\item \textbf{BLACK}: Non communicating solver
+%\end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{g5_select_BP.pdf}
+\caption{Comparison between sequential and parallel (best improvement and first improvement selections) runs to solve \SGP{} 5-3-7 using \posl}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{g5_comm_BP.pdf}
+\caption{Different communication strategies to solve \SGP{} 5-3-7 using \posl}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{g9_select_BP.pdf}
+\caption{Comparison between sequential and parallel (best improvement and first improvement selections) runs to solve \SGP{} 9-4-8 using \posl}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{g9_comm_BP.pdf}
+\caption{Different communication strategies to solve \SGP{} 9-4-8 using \posl}
+\end{figure}

@@ -1,0 +1,33 @@
+\chapter{Results of experiments with \sgp}
+\label{app:sgp}
+\textit{In this appendix results values of experiments with \sgp{} are presented. }
+\vfill
+\newpage
+
+Column labels:
+\begin{itemize}
+\item \texttt{Std: Simple Swap}: Experiments testing the neighborhood \cm{} swapping players among groups.
+\item \texttt{AS: Adaptive Search swap}: Experiments testing the neighborhood \cm{} swapping the most culprit player with other players from the same week. It is based on the {\it Adaptive Search} algorithm.
+\item \texttt{AS (rho) SS}: Experiments testing the neighborhood \cm{} combining \texttt{Std} and \texttt{AS} through the operator $\circled{$\rho$}$.
+\item \texttt{AS U SS}: Experiments testing the neighborhood \cm{} combining \texttt{Std} and \texttt{AS} through the operator $\circled{$\cup$}$.
+\item \texttt{K \% / com. 1-1}: Experiment with $K$\% of communicating solvers ($\tfrac{K}{2}$\% of sender solvers, and $\tfrac{K}{2}$\% of receiver solvers) using communication \textit{one~to~one}, and $100-K$\% of non-communicating solvers.
+\item \texttt{K \% / com. 1-N}: Experiment with $K$\% of communicating solvers ($\tfrac{K}{2}$\% of sender solvers, and $\tfrac{K}{2}$\% of receiver solvers) using communication \textit{one~to~N}, and $100-K$\% of non-communicating solvers.
+\item \texttt{Best Improvement}: Experiment using the selection function selecting the best configuration inside the neighborhood that improves the current cost (in parallel).
+\item \texttt{First Improvement}: Experiment using the selection function selecting the first configuration inside the neighborhood that improves the current cost (in parallel).
+\item \texttt{First Improvement (sequential)}: Experiment using the selection function selecting the best configuration inside the neighborhood that improves the current cost (sequentially).
+\item \texttt{Time}: Time in milliseconds. 
+\item \texttt{Iter.}: Number of iterations.
+\end{itemize}
+
+Color caption:
+\begin{itemize}
+\item \gracias{Values in red color}: A receiver solver was the winner, finding the solution thanks to the received information.
+\item \receiver{Values in dark red color}: A receiver solver was the winner, finding the solution without tacking into account the received information.
+\item \sender{Values in blue color}: A sender solver was the winner.
+\item \nocomm{Values in black color}: A non-communicating solver was the winner.
+\end{itemize}
+
+%\noindent\rule[2pt]{\textwidth}{0.8pt}
+
+\clearpage
+\includepdf[pages=-]{appres//res_golfers.pdf}

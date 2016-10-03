@@ -1,0 +1,33 @@
+%With operation modules and open channels already assembled through the \as, we can create solvers by instantiating modules. \posl{} provides an environment to this end and we present the procedure to use it.
+
+%With \module s, \opch s and \cstr{} defined, we can create solvers by instantiating the declared components. \af{} provides an environment to this end, presented in Algorithm~\ref{algo:solver_def}, where $m_i$ and $ch_i$ represent the instances of the \module s and the instances of the \opch s to be passed by parameters to the \cstr{} $St$.
+
+With \bothmodules{} composing an \as, one can create solvers by instantiating \ms. This is simply done by specifying that a given \mbox{\tet{\bf solver}} must \mbox{\tet{\bf implements}} a given \as, followed by the list of \omprefix{} then \opchs{}. These modules must match signatures required by the \as. 
+
+\poslexample{In the following example, I describe some concrete \oms{} that can be used to implement the \as{} declared in Algorithm~\ref{algo:as_example}:
+\begin{list}{\boxed{Computation\hspace{4pt}module- \arabic{qcounter}~}}{\usecounter{qcounter}} \itemsep0em 
+	\item $I_{rand}$ generates a random configuration $s$ \label{estruct:S}
+	\item $V_{1ch}$ defines the neighborhood $\mathcal{V}\left(s\right)$ changing only one element \label{estruct:V}
+	\item $S_{best}$ selects the best configuration $s' \in \mathcal{V}\left(s\right)$ improving the current cost. \label{estruct:SS}
+	\item $A_{alw}$ evaluates an acceptance criterion for $s'$. We have chosen the classical module, selecting the configuration with the lowest global cost, {\it i.e.}, the one which is likely the closest to a solution. \label{estruct:A}
+\end{list}
+I use also the following concrete \opch{}:
+\begin{list}{\boxed{Communication\hspace{4pt}module- \arabic{qcounter}~}}{\usecounter{qcounter}} \itemsep0em 
+	\item $CM_{last}$ returns the last configuration arrived, if at the time of its execution, there is more than one configuration waiting to be received. 
+\end{list}
+These modules are used and explained in details in Chapter~\ref{chap:expe}. Algorithm~\ref{algo:solver_def} implements Algorithm~\ref{algo:as_example} by instantiating its modules.
+}
+
+\begin{algorithm}[H]
+\dontprintsemicolon
+\SetNoline
+\SetKwProg{myproc}{}{}{}
+%\myproc{
+\tet{\bf solver} solver\_01 \tet{\bf implements} as\_01\;
+\tet{\bf computation} : $I_{rand}, V_{1ch}, S_{best}, A_{alw}$ \; 
+\tet{\bf connection}: $CM_{last}$\; %}{
+%	\Begin{
+%	}
+%}
+\caption{An instantiation of the \as{} presented in Algorithm~\ref{algo:as_example}}\label{algo:solver_def}
+\end{algorithm}
